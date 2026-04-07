@@ -42,11 +42,11 @@ export default async function ShortcutsPage() {
     <main className="min-h-svh flex items-center justify-center px-5 py-16">
       <div className="w-full max-w-sm">
         <Link
-          href="/"
+          href="/decks"
           className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-10"
         >
           <ArrowLeft size={14} />
-          Back
+          Back to decks
         </Link>
 
         <h1 className="text-2xl font-semibold tracking-tight mb-8">

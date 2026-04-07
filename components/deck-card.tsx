@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { motion } from "motion/react";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { Check, Globe, Lock, User } from "lucide-react";
+import { Check, Globe, Lock, Star, User, ArrowRight } from "lucide-react";
 import Image from "next/image";
 
 interface DeckCardProps {
@@ -15,7 +16,9 @@ interface DeckCardProps {
   creator?: string;
   isPublic: boolean;
   isSelected: boolean;
+  isFavorited?: boolean;
   onSelect: (id: string) => void;
+  onToggleFavorite?: (id: string) => void;
   image?: string;
   offsetRotation?: number;
 }
@@ -29,7 +32,9 @@ export function DeckCard({
   creator,
   isPublic,
   isSelected,
+  isFavorited,
   onSelect,
+  onToggleFavorite,
   image,
   offsetRotation = 0,
 }: DeckCardProps) {
@@ -102,15 +107,34 @@ export function DeckCard({
           </div>
 
           <div className="p-4">
-            <h3 className="font-semibold text-foreground truncate">{title}</h3>
-            {creator && (
-              <p className="text-xs text-muted-foreground mt-1">by {creator}</p>
-            )}
-            {!creator && lastStudied && (
-              <p className="text-xs text-muted-foreground mt-1">
-                Studied {lastStudied}
-              </p>
-            )}
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <h3 className="font-semibold text-foreground truncate">{title}</h3>
+                {creator && (
+                  <p className="text-xs text-muted-foreground mt-1">by {creator}</p>
+                )}
+                {!creator && lastStudied && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Studied {lastStudied}
+                  </p>
+                )}
+              </div>
+              {onToggleFavorite && (
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); onToggleFavorite(id); }}
+                  className="shrink-0 p-0.5 rounded text-muted-foreground hover:text-amber-500 transition-colors"
+                  aria-label={isFavorited ? "Remove from favorites" : "Add to favorites"}
+                >
+                  <Star
+                    className={cn(
+                      "w-4 h-4 transition-colors",
+                      isFavorited ? "fill-amber-500 text-amber-500" : "",
+                    )}
+                  />
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
@@ -154,9 +178,14 @@ export function DeckCard({
               ) : (
                 <span />
               )}
-              <span className="text-xs text-muted-foreground">
-                {cardCount} cards
-              </span>
+              <Link
+                href={`/decks/${id}`}
+                onClick={(e) => e.stopPropagation()}
+                className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                View
+                <ArrowRight className="w-3 h-3" />
+              </Link>
             </div>
           </div>
         </div>

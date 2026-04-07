@@ -1,20 +1,36 @@
 "use client"
 
 import { useEffect } from "react"
+import Link from "next/link"
 import { motion, useMotionValue, useTransform, animate } from "motion/react"
-import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+
+interface CardData {
+  id: string
+  question: string
+  answer: string
+  image?: string
+  familiarity: number
+}
 
 interface SessionCompleteProps {
   correctCount: number
   totalCards: number
+  wrongCards: CardData[]
+  dueCards: CardData[]
   onRestart: () => void
+  onStudyWrong: () => void
+  onStudyDue: () => void
 }
 
 export function SessionComplete({
   correctCount,
   totalCards,
+  wrongCards,
+  dueCards,
   onRestart,
+  onStudyWrong,
+  onStudyDue,
 }: SessionCompleteProps) {
   const percentage = Math.round((correctCount / totalCards) * 100)
 
@@ -45,7 +61,14 @@ export function SessionComplete({
 
   const item = {
     initial: { opacity: 0, y: 12 },
-    animate: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] } },
+    animate: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        ease: [0.22, 1, 0.36, 1] as [number, number, number, number],
+      },
+    },
   }
 
   return (
@@ -55,7 +78,10 @@ export function SessionComplete({
       initial="initial"
       animate="animate"
     >
-      <motion.p className="text-6xl sm:text-7xl font-semibold tracking-tight" variants={item}>
+      <motion.p
+        className="text-6xl sm:text-7xl font-semibold tracking-tight"
+        variants={item}
+      >
         <motion.span>{rounded}</motion.span>%
       </motion.p>
 
@@ -63,15 +89,39 @@ export function SessionComplete({
         {correctCount} of {totalCards} correct
       </motion.p>
 
-      <Button size="lg" className="mt-6 active:scale-[0.98]" asChild>
-        <motion.button
+      <motion.div
+        className="mt-6 flex flex-col items-center gap-3"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1, transition: { duration: 0.25, delay: 0.35 } }}
+      >
+        {wrongCards.length > 0 && (
+          <Button size="lg" onClick={onStudyWrong} className="active:scale-[0.98]">
+            Study wrong answers ({wrongCards.length})
+          </Button>
+        )}
+
+        {dueCards.length > 0 && (
+          <Button size="lg" variant="outline" onClick={onStudyDue} className="active:scale-[0.98]">
+            Study due cards ({dueCards.length})
+          </Button>
+        )}
+
+        <Button
+          size="lg"
+          variant={wrongCards.length > 0 || dueCards.length > 0 ? "outline" : "default"}
           onClick={onRestart}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1, transition: { duration: 0.25, delay: 0.3 } }}
+          className="active:scale-[0.98]"
         >
           Study again
-        </motion.button>
-      </Button>
+        </Button>
+
+        <Link
+          href="/decks"
+          className="text-sm text-muted-foreground hover:text-foreground transition-colors mt-1"
+        >
+          Back to decks
+        </Link>
+      </motion.div>
     </motion.div>
   )
 }

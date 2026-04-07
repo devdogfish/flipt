@@ -1,6 +1,7 @@
 "use client"
 
 import { useRouter } from "next/navigation"
+import { useTheme } from "next-themes"
 import { signOut } from "@/lib/auth-client"
 import Link from "next/link"
 import {
@@ -12,6 +13,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Monitor, Moon, Sun } from "lucide-react"
+import { cn } from "@/lib/utils"
+import { updateTheme } from "@/app/actions"
 
 interface UserMenuProps {
   userName: string
@@ -19,8 +23,15 @@ interface UserMenuProps {
   userImage?: string | null
 }
 
+const THEMES = [
+  { value: "system", label: "System", icon: Monitor },
+  { value: "light", label: "Light", icon: Sun },
+  { value: "dark", label: "Dark", icon: Moon },
+] as const
+
 export function UserMenu({ userName, userEmail, userImage }: UserMenuProps) {
   const router = useRouter()
+  const { theme, setTheme } = useTheme()
 
   const initials = userName
     .split(" ")
@@ -32,6 +43,12 @@ export function UserMenu({ userName, userEmail, userImage }: UserMenuProps) {
   async function handleSignOut() {
     await signOut()
     router.push("/sign-in")
+  }
+
+  function handleThemeChange(value: string) {
+    setTheme(value)
+    const dbTheme = value.toUpperCase() as "SYSTEM" | "LIGHT" | "DARK"
+    updateTheme(dbTheme)
   }
 
   return (
@@ -51,8 +68,36 @@ export function UserMenu({ userName, userEmail, userImage }: UserMenuProps) {
             <span className="text-xs font-normal text-muted-foreground">{userEmail}</span>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
+
+          {/* Theme switcher */}
+          <div className="px-2 py-1.5">
+            <p className="text-xs text-muted-foreground mb-2">Theme</p>
+            <div className="flex gap-1">
+              {THEMES.map(({ value, label, icon: Icon }) => (
+                <button
+                  key={value}
+                  onClick={() => handleThemeChange(value)}
+                  className={cn(
+                    "flex-1 flex flex-col items-center gap-1 py-1.5 rounded-md text-xs transition-colors",
+                    theme === value
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                  )}
+                  title={label}
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                  <span>{label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <DropdownMenuSeparator />
           <DropdownMenuItem asChild className="cursor-pointer">
             <Link href="/decks">Switch decks</Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild className="cursor-pointer">
+            <Link href="/settings">Settings</Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem

@@ -14,10 +14,20 @@ import {
   Search,
   Sparkles,
   X,
+  Plus,
+  ArrowUpDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { DeckCard } from "@/components/deck-card";
+import { toggleFavorite } from "@/app/actions";
 
 const DECK_COLORS = [
   "#F59E0B",
@@ -36,6 +46,8 @@ function deckColor(id: string) {
 
 const ROTATION_OFFSETS = [-2, 1.5, -1, 2, -1.5];
 
+type SortKey = "newest" | "most-cards" | "alphabetical"
+
 interface DeckData {
   id: string;
   title: string;
@@ -44,6 +56,7 @@ interface DeckData {
   coverImage?: string | null;
   ownerName?: string | null;
   isPublic?: boolean;
+  createdAt?: string;
 }
 
 interface DeckSelectionProps {
@@ -60,6 +73,18 @@ export function DeckSelection({
   const router = useRouter();
   const [selectedDecks, setSelectedDecks] = useState<string[]>([]);
   const [query, setQuery] = useState("");
+  const [sort, setSort] = useState<SortKey>("newest");
+  const [localFavorites, setLocalFavorites] = useState(() => new Set(favoriteIds));
+
+  const handleToggleFavorite = useCallback((deckId: string) => {
+    setLocalFavorites((prev) => {
+      const next = new Set(prev);
+      if (next.has(deckId)) next.delete(deckId);
+      else next.add(deckId);
+      return next;
+    });
+    toggleFavorite(deckId);
+  }, []);
 
   const handleSelect = useCallback((id: string) => {
     setSelectedDecks((prev) =>
@@ -92,23 +117,41 @@ export function DeckSelection({
       .filter(Boolean);
   }, [selectedDecks, allDecks]);
 
-  const favoriteSet = useMemo(() => new Set(favoriteIds), [favoriteIds]);
+  const sortDecks = useCallback(
+    (decks: DeckData[]): DeckData[] => {
+      const sorted = [...decks]
+      if (sort === "alphabetical") {
+        sorted.sort((a, b) => a.title.localeCompare(b.title))
+      } else if (sort === "most-cards") {
+        sorted.sort((a, b) => b.cardCount - a.cardCount)
+      } else {
+        // newest: sort by createdAt desc (fallback to original order)
+        sorted.sort((a, b) => {
+          if (!a.createdAt || !b.createdAt) return 0
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        })
+      }
+      return sorted
+    },
+    [sort],
+  )
 
   const filter = useCallback(
     (decks: DeckData[]) => {
-      if (!query.trim()) return decks;
-      const q = query.toLowerCase();
-      return decks.filter((d) => d.title.toLowerCase().includes(q));
+      const filtered = !query.trim()
+        ? decks
+        : decks.filter((d) => d.title.toLowerCase().includes(query.toLowerCase()))
+      return sortDecks(filtered)
     },
-    [query],
+    [query, sortDecks],
   );
 
-  const favoriteDecks = filter(allDecks.filter((d) => favoriteSet.has(d.id)));
+  const favoriteDecks = filter(allDecks.filter((d) => localFavorites.has(d.id)));
   const filteredUserDecks = filter(
-    userDecks.filter((d) => !favoriteSet.has(d.id)),
+    userDecks.filter((d) => !localFavorites.has(d.id)),
   );
   const filteredPublicDecks = filter(
-    publicDecks.filter((d) => !favoriteSet.has(d.id)),
+    publicDecks.filter((d) => !localFavorites.has(d.id)),
   );
 
   const hasAnyDecks = allDecks.length > 0;
@@ -129,26 +172,51 @@ export function DeckSelection({
           Back
         </Link>
 
-        <div className="max-w-sm mb-8">
-          <h1 className="text-2xl font-semibold tracking-tight mb-1">
-            Choose your decks
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Pick from your collection or discover community decks
-          </p>
+        <div className="flex items-start justify-between gap-4 mb-8">
+          <div className="max-w-sm">
+            <h1 className="text-2xl font-semibold tracking-tight mb-1">
+              Choose your decks
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Pick from your collection or discover community decks
+            </p>
+          </div>
+          <Link href="/decks/new">
+            <Button variant="outline" size="sm" className="gap-2 shrink-0">
+              <Plus className="w-4 h-4" />
+              New deck
+            </Button>
+          </Link>
         </div>
 
-        {/* Search */}
+        {/* Search + Sort */}
         {hasAnyDecks && (
-          <div className="relative max-w-sm mb-10">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-            <Input
-              type="text"
-              placeholder="Search decks…"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="pl-9"
-            />
+          <div className="flex items-center gap-3 mb-10">
+            <div className="relative max-w-sm flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+              <Input
+                type="text"
+                placeholder="Search decks…"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-2 shrink-0">
+                  <ArrowUpDown className="w-3.5 h-3.5" />
+                  {sort === "newest" ? "Newest" : sort === "most-cards" ? "Most cards" : "A–Z"}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuRadioGroup value={sort} onValueChange={(v) => setSort(v as SortKey)}>
+                  <DropdownMenuRadioItem value="newest">Newest</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="most-cards">Most cards</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="alphabetical">A–Z</DropdownMenuRadioItem>
+                </DropdownMenuRadioGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         )}
 
@@ -203,7 +271,9 @@ export function DeckSelection({
                           creator={deck.ownerName ?? undefined}
                           isPublic={section.isPublic}
                           isSelected={selectedDecks.includes(deck.id)}
+                          isFavorited={localFavorites.has(deck.id)}
                           onSelect={handleSelect}
+                          onToggleFavorite={handleToggleFavorite}
                           image={deck.coverImage ?? undefined}
                           offsetRotation={
                             ROTATION_OFFSETS[index % ROTATION_OFFSETS.length]

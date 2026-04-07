@@ -10,12 +10,12 @@ export default async function DecksPage() {
 
   const [userDecks, publicDecks, favorites] = await Promise.all([
     prisma.deck.findMany({
-      where: { ownerId: session.user.id, visibility: "PRIVATE" },
+      where: { ownerId: session.user.id },
       include: { _count: { select: { cards: true } } },
       orderBy: { updatedAt: "desc" },
     }),
     prisma.deck.findMany({
-      where: { visibility: "PUBLIC" },
+      where: { visibility: "PUBLIC", ownerId: { not: session.user.id } },
       include: {
         _count: { select: { cards: true } },
         owner: { select: { name: true } },
@@ -30,13 +30,14 @@ export default async function DecksPage() {
 
   const favoriteIds = new Set(favorites.map((f) => f.deckId))
 
-  const toRow = (d: { id: string; title: string; description: string | null; coverImage: string | null; _count: { cards: number }; owner?: { name: string | null } | null }) => ({
+  const toRow = (d: { id: string; title: string; description: string | null; coverImage: string | null; createdAt: Date; _count: { cards: number }; owner?: { name: string | null } | null }) => ({
     id: d.id,
     title: d.title,
     description: d.description ?? "",
     cardCount: d._count.cards,
     coverImage: d.coverImage ?? null,
     ownerName: d.owner?.name ?? null,
+    createdAt: d.createdAt.toISOString(),
   })
 
   return (

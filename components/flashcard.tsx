@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { cn } from "@/lib/utils";
+import { addWindDisturbance } from "@/components/overlays/draw-fog2";
 import Image from "next/image";
 
 interface FlashcardProps {
@@ -154,6 +155,9 @@ export function Flashcard({
       src.start(0, WHOOSH_OFFSETS[idx]);
       onWhooshPlayed?.(idx + 1);
     }
+
+    // Punch a void in the fog — card whooshing in repels the mist
+    addWindDisturbance(window.innerWidth / 2, window.innerHeight / 2);
 
     // ENTER GROUP: shake fires at the spring's visual impact point
     // const shakeTimer = setTimeout(triggerShake, ENTER_ANIM.impactMs)

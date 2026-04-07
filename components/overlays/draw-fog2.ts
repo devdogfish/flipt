@@ -8,8 +8,8 @@ const PERSISTENCE = 0.5
 const LACUNARITY  = 2.0
 const NOISE_SCALE = 0.0032
 
-const DRIFT_SPEED  = 0.6    // CSS px/frame — main horizontal drift
-const WARP_SPEED   = 0.25   // how fast the warp field itself evolves
+const DRIFT_SPEED  = 0.42   // CSS px/frame — main horizontal drift
+const WARP_SPEED   = 0.22   // how fast the warp field itself evolves
 const WARP_STRENGTH = 3.5   // how strongly the warp displaces sample coords (noise units)
 
 const DENSITY_THRESHOLD = 0.36
@@ -27,6 +27,20 @@ const VOID_STRENGTH = 0.24
 const SCALE = 4
 
 const FOG_R = 92, FOG_G = 97, FOG_B = 116
+
+// --- Wind disturbance system ---
+// When a card whooshes in, a radial void is punched into the fog and fades out.
+type Disturbance = { x: number; y: number; t: number }
+const disturbances: Disturbance[] = []
+
+const DIST_EXPAND_MS  = 310    // radius grows to full over this duration
+const DIST_TOTAL_MS   = 3800   // how long until the void fully closes
+const DIST_MAX_R_FRAC = 0.47   // max radius as fraction of screen width (in block pixels)
+const DIST_STRENGTH   = 1.0    // threshold boost at centre — 0 = no effect, >1 = hard clear
+
+export function addWindDisturbance(screenX: number, screenY: number): void {
+  disturbances.push({ x: screenX, y: screenY, t: performance.now() })
+}
 
 // --- Permutation table (randomised on module load) ---
 const PERM = new Uint8Array(512)
@@ -131,6 +145,24 @@ export function drawFog2(ctx: CanvasRenderingContext2D, w: number, h: number): (
     driftTime += DRIFT_SPEED  * NOISE_SCALE
     warpTime  += WARP_SPEED   * NOISE_SCALE * 0.6
 
+    // --- Pre-compute active wind disturbances for this frame ---
+    const now  = performance.now()
+    const maxR = bw * DIST_MAX_R_FRAC
+    // Expire old ones
+    for (let i = disturbances.length - 1; i >= 0; i--) {
+      if (now - disturbances[i].t >= DIST_TOTAL_MS) disturbances.splice(i, 1)
+    }
+    // Map each disturbance to block-pixel space with current radius + strength
+    const activeDisturbs = disturbances.map(d => {
+      const elapsed  = now - d.t
+      // Radius: fast ease-out cubic expansion
+      const expandT  = Math.min(elapsed / DIST_EXPAND_MS, 1.0)
+      const r        = maxR * (1 - Math.pow(1 - expandT, 3))
+      // Strength: power-curve fade so it holds longer then drops off
+      const s        = DIST_STRENGTH * Math.pow(1 - elapsed / DIST_TOTAL_MS, 1.8)
+      return { bx: d.x / SCALE, by: d.y / SCALE, r, s }
+    })
+
     for (let py = 0; py < bh; py++) {
       const vm      = vMask[py]
       const rowBase = py * bw * 4
@@ -153,7 +185,18 @@ export function drawFog2(ctx: CanvasRenderingContext2D, w: number, h: number): (
           nx * VOID_FREQ + warpTime * VOID_TIME,
           ny * VOID_FREQ + warpTime * VOID_TIME * 0.4
         )
-        const thresh = DENSITY_THRESHOLD + (voidN - 0.5) * 2 * VOID_STRENGTH
+        let thresh = DENSITY_THRESHOLD + (voidN - 0.5) * 2 * VOID_STRENGTH
+
+        // Wind disturbance: card whoosh temporarily repels the fog
+        for (const ad of activeDisturbs) {
+          const dx     = qx - ad.bx
+          const dy     = py - ad.by
+          const distSq = dx * dx + dy * dy
+          if (distSq < ad.r * ad.r) {
+            const ft = 1 - Math.sqrt(distSq) / ad.r  // 1 at centre → 0 at edge
+            thresh  += ft * ft * (3 - 2 * ft) * ad.s  // smoothstep falloff
+          }
+        }
 
         const shifted = raw - thresh
         if (shifted <= 0) {

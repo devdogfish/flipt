@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "db:start": "docker start flipt-db 2>/dev/null || docker run --name flipt-db -e POSTGRES_HOST_AUTH_METHOD=trust -e POSTGRES_USER=postgres -e POSTGRES_DB=flipt -p 5432:5432 -d postgres",
     "db:stop": "docker stop flipt-db",
-    "db:seed": "bun run prisma/seed.ts"
+    "db:seed": "bun run prisma/seed.ts",
+    "db:reseed": "bunx prisma migrate reset && bun run db:seed"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

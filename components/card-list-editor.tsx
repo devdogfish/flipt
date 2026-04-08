@@ -1,11 +1,11 @@
-"use client"
+"use client";
 
-import { useState, useTransition } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
-import { Separator } from "@/components/ui/separator"
+import { useState, useTransition } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,47 +16,41 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { Plus, Pencil, Trash2, Check, X } from "lucide-react"
-import { createCard, updateCard, deleteCard } from "@/app/actions"
+} from "@/components/ui/alert-dialog";
+import { Plus, Pencil, Trash2, Check, X } from "lucide-react";
+import { createCard, updateCard, deleteCard } from "@/app/actions";
 
 interface CardData {
-  id: string
-  question: string
-  answer: string
-  imageUrl: string | null
-  position: number
+  id: string;
+  question: string;
+  answer: string;
+  imageUrl: string | null;
+  position: number;
 }
 
 interface CardListEditorProps {
-  deckId: string
-  initialCards: CardData[]
+  deckId: string;
+  initialCards: CardData[];
 }
 
-function CardRow({
-  card,
-  deckId,
-}: {
-  card: CardData
-  deckId: string
-}) {
-  const [editing, setEditing] = useState(false)
-  const [question, setQuestion] = useState(card.question)
-  const [answer, setAnswer] = useState(card.answer)
-  const [isPending, startTransition] = useTransition()
+function CardRow({ card, deckId }: { card: CardData; deckId: string }) {
+  const [editing, setEditing] = useState(false);
+  const [question, setQuestion] = useState(card.question);
+  const [answer, setAnswer] = useState(card.answer);
+  const [isPending, startTransition] = useTransition();
 
   function handleSave() {
-    if (!question.trim() || !answer.trim()) return
+    if (!question.trim() || !answer.trim()) return;
     startTransition(async () => {
-      await updateCard(card.id, question, answer, card.imageUrl)
-      setEditing(false)
-    })
+      await updateCard(card.id, question, answer, card.imageUrl);
+      setEditing(false);
+    });
   }
 
   function handleCancel() {
-    setQuestion(card.question)
-    setAnswer(card.answer)
-    setEditing(false)
+    setQuestion(card.question);
+    setAnswer(card.answer);
+    setEditing(false);
   }
 
   if (editing) {
@@ -84,20 +78,27 @@ function CardRow({
             <Check className="w-3.5 h-3.5 mr-1.5" />
             Save
           </Button>
-          <Button size="sm" variant="ghost" onClick={handleCancel} disabled={isPending}>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={handleCancel}
+            disabled={isPending}
+          >
             <X className="w-3.5 h-3.5 mr-1.5" />
             Cancel
           </Button>
         </div>
       </div>
-    )
+    );
   }
 
   return (
     <div className="group rounded-xl border border-border bg-card p-4 flex items-start justify-between gap-4">
       <div className="min-w-0 flex-1 space-y-1">
         <p className="text-sm font-medium leading-snug">{card.question}</p>
-        <p className="text-sm text-muted-foreground leading-snug">{card.answer}</p>
+        <p className="text-sm text-muted-foreground leading-snug">
+          {card.answer}
+        </p>
       </div>
       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
         <Button
@@ -110,7 +111,11 @@ function CardRow({
         </Button>
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive hover:text-destructive">
+            <Button
+              size="icon"
+              variant="ghost"
+              className="h-7 w-7 text-destructive hover:text-destructive"
+            >
               <Trash2 className="w-3.5 h-3.5" />
             </Button>
           </AlertDialogTrigger>
@@ -125,7 +130,9 @@ function CardRow({
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction
                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                onClick={() => { deleteCard(card.id) }}
+                onClick={() => {
+                  deleteCard(card.id);
+                }}
               >
                 Delete
               </AlertDialogAction>
@@ -134,37 +141,44 @@ function CardRow({
         </AlertDialog>
       </div>
     </div>
-  )
+  );
 }
 
 function AddCardForm({ deckId }: { deckId: string }) {
-  const [open, setOpen] = useState(false)
-  const [question, setQuestion] = useState("")
-  const [answer, setAnswer] = useState("")
-  const [isPending, startTransition] = useTransition()
+  const [open, setOpen] = useState(false);
+  const [question, setQuestion] = useState("");
+  const [answer, setAnswer] = useState("");
+  const [isPending, startTransition] = useTransition();
 
   function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    if (!question.trim() || !answer.trim()) return
+    e.preventDefault();
+    if (!question.trim() || !answer.trim()) return;
     startTransition(async () => {
-      await createCard(deckId, question, answer)
-      setQuestion("")
-      setAnswer("")
-      setOpen(false)
-    })
+      await createCard(deckId, question, answer);
+      setQuestion("");
+      setAnswer("");
+      setOpen(false);
+    });
   }
 
   if (!open) {
     return (
-      <Button variant="outline" onClick={() => setOpen(true)} className="w-full gap-2">
+      <Button
+        variant="outline"
+        onClick={() => setOpen(true)}
+        className="w-full gap-2"
+      >
         <Plus className="w-4 h-4" />
         Add card
       </Button>
-    )
+    );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-xl border border-primary/40 bg-muted/30 p-4 space-y-3">
+    <form
+      onSubmit={handleSubmit}
+      className="rounded-xl border border-primary/40 bg-muted/30 p-4 space-y-3"
+    >
       <div className="space-y-1.5">
         <Label className="text-xs text-muted-foreground">Question</Label>
         <Textarea
@@ -195,21 +209,27 @@ function AddCardForm({ deckId }: { deckId: string }) {
           size="sm"
           variant="ghost"
           type="button"
-          onClick={() => { setOpen(false); setQuestion(""); setAnswer("") }}
+          onClick={() => {
+            setOpen(false);
+            setQuestion("");
+            setAnswer("");
+          }}
           disabled={isPending}
         >
           Cancel
         </Button>
       </div>
     </form>
-  )
+  );
 }
 
 export function CardListEditor({ deckId, initialCards }: CardListEditorProps) {
   return (
     <div className="space-y-3">
       {initialCards.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No cards yet. Add your first card below.</p>
+        <p className="text-sm text-muted-foreground">
+          No cards yet. Add your first card below.
+        </p>
       ) : (
         initialCards.map((card) => (
           <CardRow key={card.id} card={card} deckId={deckId} />
@@ -220,5 +240,5 @@ export function CardListEditor({ deckId, initialCards }: CardListEditorProps) {
 
       <AddCardForm deckId={deckId} />
     </div>
-  )
+  );
 }

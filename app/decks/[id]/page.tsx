@@ -87,7 +87,7 @@ export default async function DeckDetailPage({
 
         {deck.coverImage && (
           <div className="relative h-48 rounded-2xl overflow-hidden mb-6">
-            <Image src={deck.coverImage} alt={deck.title} fill className="object-cover" />
+            <Image src={deck.coverImage} alt={deck.title} fill className="object-cover" priority />
           </div>
         )}
 

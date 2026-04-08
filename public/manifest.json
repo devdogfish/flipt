@@ -1,6 +1,6 @@
 {
-  "name": "Flash",
-  "short_name": "Flash",
+  "name": "Flipt",
+  "short_name": "Flipt",
   "description": "A minimalist flashcard experience",
   "start_url": "/decks",
   "display": "standalone",
@@ -8,13 +8,8 @@
   "theme_color": "#ffffff",
   "icons": [
     {
-      "src": "/icon-light-32x32.png",
-      "sizes": "32x32",
-      "type": "image/png"
-    },
-    {
-      "src": "/apple-icon.png",
-      "sizes": "180x180",
+      "src": "/logo.png",
+      "sizes": "583x583",
       "type": "image/png"
     }
   ]

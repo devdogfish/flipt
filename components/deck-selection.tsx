@@ -249,7 +249,7 @@ export function DeckSelection({
             },
           ]
             .filter((s) => s.decks.length > 0)
-            .map((section) => (
+            .map((section, sectionIndex) => (
               <div key={section.label}>
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-widest mb-6 flex items-center gap-1.5">
                   {section.icon}
@@ -276,6 +276,7 @@ export function DeckSelection({
                         onSelect={handleSelect}
                         onToggleFavorite={handleToggleFavorite}
                         image={deck.coverImage ?? undefined}
+                        priority={sectionIndex === 0 && index < 3}
                       />
                     </motion.div>
                   ))}

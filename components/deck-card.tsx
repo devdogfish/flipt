@@ -56,7 +56,8 @@ export function DeckCard({
   onSelect,
   onToggleFavorite,
   image,
-}: DeckCardProps) {
+  priority = false,
+}: DeckCardProps & { priority?: boolean }) {
   const [hovered, setHovered] = useState(false);
   const gradient = cardGradient(id);
 
@@ -77,7 +78,7 @@ export function DeckCard({
         {/* Cover image or gradient placeholder */}
         <div className="absolute inset-0">
           {image ? (
-            <Image src={image} alt={title} fill className="object-cover" />
+            <Image src={image} alt={title} fill className="object-cover" priority={priority} />
           ) : (
             <div className={cn("w-full h-full bg-linear-to-br", gradient)}>
               <div className="w-full h-full flex items-center justify-center">

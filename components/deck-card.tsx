@@ -69,7 +69,7 @@ export function DeckCard({
     >
       <div
         className={cn(
-          "relative w-56 h-56 rounded-2xl overflow-hidden",
+          "relative w-full aspect-[3/4] rounded-2xl overflow-hidden",
           "shadow-[0_4px_24px_-4px_rgba(0,0,0,0.18)]",
           isSelected && "ring-2 ring-primary ring-offset-2 ring-offset-background",
         )}

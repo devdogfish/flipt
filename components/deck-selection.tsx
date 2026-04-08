@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { DeckCard, cardGradient } from "@/components/deck-card";
 import { toggleFavorite } from "@/app/actions";
+import { NewDeckButton } from "./new-deck-button";
 
 type SortKey = "newest" | "most-cards" | "alphabetical";
 
@@ -167,7 +168,7 @@ export function DeckSelection({
       {/* Search + Sort */}
       {hasAnyDecks && (
         <div className="flex items-center gap-3 mb-10">
-          <div className="relative max-w-sm flex-1">
+          <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
             <Input
               ref={searchRef}
@@ -210,6 +211,7 @@ export function DeckSelection({
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>
           </DropdownMenu>
+          <NewDeckButton />
         </div>
       )}
 
@@ -253,7 +255,7 @@ export function DeckSelection({
                   {section.icon}
                   {section.label}
                 </p>
-                <div className="flex flex-wrap gap-6">
+                <div className="grid grid-cols-3 gap-6">
                   {section.decks.map((deck, index) => (
                     <motion.div
                       key={deck.id}
@@ -333,7 +335,11 @@ export function DeckSelection({
                   </span>
                 </div>
 
-                <Button onClick={handleStartStudy} size="sm" className="shrink-0 gap-1 rounded-full px-4">
+                <Button
+                  onClick={handleStartStudy}
+                  size="sm"
+                  className="shrink-0 gap-1 rounded-full px-4"
+                >
                   Start Studying
                   <ChevronRight size={14} />
                 </Button>

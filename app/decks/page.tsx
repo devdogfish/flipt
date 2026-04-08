@@ -58,9 +58,6 @@ export default async function DecksPage() {
       subtitle="Pick from your collection or discover community decks"
       backHref="/"
       backLabel="Back"
-      maxWidth="max-w-4xl"
-      className="pb-36"
-      action={<NewDeckButton />}
     >
       <DeckSelection
         userDecks={userDecks.map(toRow)}

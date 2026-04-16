@@ -10,23 +10,24 @@ const prisma = new PrismaClient({ adapter });
 async function main() {
   // Seed user that owns the public decks
   const seedUser = await prisma.user.upsert({
-    where: { email: "seed@flipt.app" },
-    update: {},
+    where: { email: "seed@flashcardbrowser.com" },
+    update: { dalEmail: "seed@dal.ca" },
     create: {
-      id: "seed-user-flipt",
-      email: "seed@flipt.app",
-      name: "Flipt",
+      id: "seed-user-flashcardbrowser",
+      email: "seed@flashcardbrowser.com",
+      name: "flashcardbrowser",
       emailVerified: true,
+      dalEmail: "seed@dal.ca",
     },
   });
 
   // Create credential account so the seed user can sign in with email/password
-  const SEED_PASSWORD = "flipt1234";
+  const SEED_PASSWORD = "flashcardbrowser1234";
   await prisma.account.upsert({
-    where: { id: "seed-account-flipt" },
+    where: { id: "seed-account-flashcardbrowser" },
     update: {},
     create: {
-      id: "seed-account-flipt",
+      id: "seed-account-flashcardbrowser",
       accountId: seedUser.id,
       providerId: "credential",
       userId: seedUser.id,
@@ -36,13 +37,14 @@ async function main() {
 
   // Second community user
   const marcusUser = await prisma.user.upsert({
-    where: { email: "marcus@flipt.app" },
-    update: {},
+    where: { email: "marcus@flashcardbrowser.com" },
+    update: { dalEmail: "marcus@dal.ca" },
     create: {
       id: "seed-user-marcus",
-      email: "marcus@flipt.app",
+      email: "marcus@flashcardbrowser.com",
       name: "Marcus",
       emailVerified: true,
+      dalEmail: "marcus@dal.ca",
     },
   });
 

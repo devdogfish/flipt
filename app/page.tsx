@@ -1,5 +1,4 @@
 import { headers } from "next/headers"
-import { redirect } from "next/navigation"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/db"
 import { StudyPage } from "@/components/study-page"
@@ -7,9 +6,8 @@ import { StudyPage } from "@/components/study-page"
 export default async function Page() {
   const session = await auth.api.getSession({ headers: await headers() })
 
-  if (!session) {
-    redirect("/sign-in")
-  }
+  // Auth temporarily disabled — skip redirect
+  // if (!session) redirect("/sign-in")
 
   const deck = await prisma.deck.findFirst({
     where: { visibility: "PUBLIC" },

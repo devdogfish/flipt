@@ -14,13 +14,27 @@ function getResend() {
 }
 
 // TODO: Update this to your verified Resend sender domain
-const FROM_EMAIL = "noreply@flipt.cards";
-const APP_NAME = "Flipt";
+const FROM_EMAIL = "noreply@flashcardbrowser.cards";
+const APP_NAME = "flashcardbrowser";
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, { provider: "postgresql" }),
   baseURL: process.env.BETTER_AUTH_URL,
-  trustedOrigins: ["https://flipt.cards", "https://www.flipt.cards"],
+  trustedOrigins: [
+    "https://flashcardbrowser.cards",
+    "https://www.flashcardbrowser.cards",
+  ],
+
+  user: {
+    additionalFields: {
+      dalEmail: {
+        type: "string",
+        nullable: true,
+        required: false,
+        input: false,
+      },
+    },
+  },
 
   emailAndPassword: {
     enabled: true,
@@ -49,9 +63,10 @@ export const auth = betterAuth({
   },
 
   socialProviders: {
-    google: {
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    microsoft: {
+      clientId: process.env.MICROSOFT_CLIENT_ID!,
+      clientSecret: process.env.MICROSOFT_CLIENT_SECRET!,
+      tenantId: process.env.MICROSOFT_TENANT_ID ?? "common",
     },
   },
 

@@ -174,9 +174,9 @@ Rules:
   Pick images that genuinely match the card content
 - If [TOPIC] has not been replaced with a real topic, stop and ask the user what topic they want`;
 
-const CLAUDE_SKILL = `# flipt deck generator
-Generate flashcard decks and return them as JSON ready for flipt import.
-Always return only valid JSON matching the flipt deck format.`;
+const CLAUDE_SKILL = `# flashcardbrowser deck generator
+Generate flashcard decks and return them as JSON ready for flashcardbrowser import.
+Always return only valid JSON matching the flashcardbrowser deck format.`;
 
 const JSON_EXAMPLE = `{
   "name": "Solar System",
@@ -208,7 +208,7 @@ const JSON_EXAMPLE = `{
 }`;
 
 const CURL_EXAMPLE = `curl -X POST https://your-app.vercel.app/api/decks \\
-  -H "Authorization: Bearer flipt_your_api_key_here" \\
+  -H "Authorization: Bearer flashcardbrowser_your_api_key_here" \\
   -H "Content-Type: application/json" \\
   -d '{
     "name": "My Deck",
@@ -223,7 +223,7 @@ const CURL_EXAMPLE = `curl -X POST https://your-app.vercel.app/api/decks \\
 const FETCH_EXAMPLE = `const response = await fetch("https://your-app.vercel.app/api/decks", {
   method: "POST",
   headers: {
-    "Authorization": "Bearer flipt_your_api_key_here",
+    "Authorization": "Bearer flashcardbrowser_your_api_key_here",
     "Content-Type": "application/json",
   },
   body: JSON.stringify({
@@ -251,14 +251,14 @@ const RESPONSE_EXAMPLE = `{
 
 export function DocsContent() {
   return (
-    <div >
+    <div>
       {/* ── Plain-language intro ──────────────────────────────────────── */}
       <p className="text-sm text-muted-foreground leading-relaxed mb-2">
-        Flipt can turn any topic into a set of flashcards — and you don't need
-        to write a single line of code to do it. You can ask any AI assistant to
-        generate a deck for you and upload the result in seconds. If you're a
-        developer or want to automate things, there's also a simple API you can
-        call from scripts, tools, or your own apps.
+        flashcardbrowser can turn any topic into a set of flashcards — and you
+        don't need to write a single line of code to do it. You can ask any AI
+        assistant to generate a deck for you and upload the result in seconds.
+        If you're a developer or want to automate things, there's also a simple
+        API you can call from scripts, tools, or your own apps.
       </p>
 
       {/* ── No-code: Use an AI ────────────────────────────────────────── */}

@@ -42,17 +42,19 @@ model User {
   name      String?
   createdAt DateTime @default(now())
 
-  decks         Deck[]
-  settings      UserSettings?
-  usage         FlashcardUsage[]
-  favorites     DeckFavorite[]
-  apiKeys       ApiKey[]
-  schedules     CardSchedule[]
-  emailVerified Boolean          @default(false)
-  image         String?
-  updatedAt     DateTime         @updatedAt
-  sessions      Session[]
-  accounts      Account[]
+  decks            Deck[]
+  settings         UserSettings?
+  usage            FlashcardUsage[]
+  favorites        DeckFavorite[]
+  apiKeys          ApiKey[]
+  schedules        CardSchedule[]
+  emailVerified    Boolean           @default(false)
+  image            String?
+  updatedAt        DateTime          @updatedAt
+  sessions         Session[]
+  accounts         Account[]
+  dalEmail         String?           @unique
+  dalVerification  DalVerification?
 
   @@map("user")
 }
@@ -192,6 +194,19 @@ model Account {
 
   @@index([userId])
   @@map("account")
+}
+
+model DalVerification {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  dalEmail  String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
 }
 
 model Verification {

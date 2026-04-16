@@ -1,4 +1,4 @@
-# Flipt
+# flashcardbrowser
 
 Flashcard app built with Next.js 15, shadcn/ui, and Prisma.
 
@@ -20,16 +20,16 @@ bun db:start   # Start the container (first run creates it; after restarts/stops
 bun db:stop    # Stop the container
 ```
 
-- Container name: `flipt-db`
+- Container name: `flashcardbrowser-db`
 - Port: `5432`
 - User: `postgres`
-- Database: `flipt`
-- Connection string: `postgresql://postgres@localhost:5432/flipt`
+- Database: `flashcardbrowser`
+- Connection string: `postgresql://postgres@localhost:5432/flashcardbrowser`
 
 Data persists across `db:stop` / `db:start` cycles. To wipe and start fresh:
 
 ```bash
-docker rm -f flipt-db
+docker rm -f flashcardbrowser-db
 bun db:start
 ```
 

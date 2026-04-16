@@ -1,6 +1,6 @@
 {
-  "name": "Flipt",
-  "short_name": "Flipt",
+  "name": "flashcardbrowser",
+  "short_name": "flashcardbrowser",
   "description": "A minimalist flashcard experience",
   "start_url": "/decks",
   "display": "standalone",

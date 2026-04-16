@@ -19,7 +19,7 @@ const _instrumentSerif = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
-  title: "Flipt",
+  title: "flashcardbrowser",
   description: "A minimalist flashcard experience",
   manifest: "/manifest.json",
   icons: {
@@ -60,6 +60,9 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <body className="font-sans antialiased bg-background text-foreground min-h-svh">
+        <div className="w-full bg-amber-400 dark:bg-amber-500 text-amber-950 text-sm font-medium text-center px-4 py-2.5">
+          Flipt is currently under development — some features may be unavailable or change without notice.
+        </div>
         <ThemeProvider
           attribute="class"
           defaultTheme={defaultTheme}

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
 
 // Routes that never require auth or Dal verification
 const PUBLIC_PREFIXES = [
@@ -18,7 +19,7 @@ function isPublicRoute(pathname: string): boolean {
   return PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   // Auth temporarily disabled during development — re-enable by removing this line
   return NextResponse.next();
 
@@ -35,7 +36,9 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/sign-in", request.url));
   }
 
-  const user = session.user as typeof session.user & { dalEmail?: string | null };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const user = (session as any).user as { dalEmail?: string | null; email: string; emailVerified: boolean; id: string };
 
   // Dev bypass — seed users don't have real Dal emails
   if (process.env.NODE_ENV === "development" && !user.dalEmail) {

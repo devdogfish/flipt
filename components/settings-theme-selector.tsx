@@ -1,25 +1,25 @@
-"use client"
+"use client";
 
-import { useTheme } from "next-themes"
-import { Monitor, Sun, Moon } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { updateTheme } from "@/app/actions"
-import { useEffect, useState } from "react"
+import { bindTheme } from "ssr-themes/react";
+import { Monitor, Sun, Moon } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { updateTheme } from "@/app/actions";
+import { theme } from "@/app/theme";
+
+const { useTheme } = bindTheme(theme);
 
 const OPTIONS = [
   { value: "system", label: "System", icon: Monitor, db: "SYSTEM" },
   { value: "light", label: "Light", icon: Sun, db: "LIGHT" },
   { value: "dark", label: "Dark", icon: Moon, db: "DARK" },
-] as const
+] as const;
 
 export function SettingsThemeSelector() {
-  const { theme, setTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => setMounted(true), [])
+  const { selected, setSelected } = useTheme();
 
   function handleChange(value: string, db: "SYSTEM" | "LIGHT" | "DARK") {
-    setTheme(value)
-    updateTheme(db)
+    setSelected(value as "system" | "light" | "dark");
+    updateTheme(db);
   }
 
   return (
@@ -30,7 +30,7 @@ export function SettingsThemeSelector() {
           onClick={() => handleChange(value, db)}
           className={cn(
             "flex flex-col items-center gap-2 flex-1 rounded-xl border p-4 text-sm transition-colors",
-            mounted && theme === value
+            selected === value
               ? "border-primary bg-primary/5 text-foreground"
               : "border-border text-muted-foreground hover:border-foreground/30 hover:text-foreground",
           )}
@@ -40,5 +40,5 @@ export function SettingsThemeSelector() {
         </button>
       ))}
     </div>
-  )
+  );
 }

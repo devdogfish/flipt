@@ -6,7 +6,6 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { DustOverlay } from "@/components/dust-overlay";
 import { UserMenu } from "@/components/user-menu";
 import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/db";
 import "./globals.css";
 
 const _geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
@@ -31,7 +30,6 @@ export const metadata: Metadata = {
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  let defaultTheme = "system";
   let sessionUser: {
     name: string;
     email: string;
@@ -45,11 +43,6 @@ export default async function RootLayout({
         email: session.user.email,
         image: session.user.image,
       };
-      const settings = await prisma.userSettings.findUnique({
-        where: { userId: session.user.id },
-        select: { theme: true },
-      });
-      if (settings?.theme) defaultTheme = settings.theme.toLowerCase();
     }
   } catch {}
 
@@ -60,15 +53,13 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <body className="font-sans antialiased bg-background text-foreground min-h-svh">
+        {/* eslint-disable-next-line @next/next/no-sync-scripts */}
+        <script src="/theme-init.js" />
         <div className="w-full bg-amber-400 dark:bg-amber-500 text-amber-950 text-sm font-medium text-center px-4 py-2.5">
-          Flipt is currently under development — some features may be unavailable or change without notice.
+          Flipt is currently under development — some features may be
+          unavailable or change without notice.
         </div>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme={defaultTheme}
-          enableSystem
-          disableTransitionOnChange
-        >
+        <ThemeProvider>
           <DustOverlay />
           {sessionUser && (
             <UserMenu

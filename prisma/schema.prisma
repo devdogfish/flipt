@@ -46,6 +46,7 @@ model User {
   settings         UserSettings?
   usage            FlashcardUsage[]
   favorites        DeckFavorite[]
+  sharedDecks      DeckShare[]
   apiKeys          ApiKey[]
   schedules        CardSchedule[]
   emailVerified    Boolean           @default(false)
@@ -95,9 +96,22 @@ model Deck {
   owner     User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   cards     Flashcard[]
   favorites DeckFavorite[]
+  shares    DeckShare[]
 
   @@index([ownerId])
   @@index([visibility])
+}
+
+model DeckShare {
+  deckId    String
+  userId    String
+  createdAt DateTime @default(now())
+
+  deck Deck @relation(fields: [deckId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([deckId, userId])
+  @@index([userId])
 }
 
 model DeckFavorite {

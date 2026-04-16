@@ -7,6 +7,7 @@ import Image from "next/image";
 import {
   Globe,
   Lock,
+  Share2,
   Star,
   ChevronRight,
   Search,
@@ -42,12 +43,14 @@ interface DeckData {
 
 interface DeckSelectionProps {
   userDecks: DeckData[];
+  sharedDecks?: DeckData[];
   publicDecks: DeckData[];
   favoriteIds: string[];
 }
 
 export function DeckSelection({
   userDecks,
+  sharedDecks = [],
   publicDecks,
   favoriteIds,
 }: DeckSelectionProps) {
@@ -97,8 +100,8 @@ export function DeckSelection({
   }, [router, selectedDecks]);
 
   const allDecks = useMemo(
-    () => [...userDecks, ...publicDecks],
-    [userDecks, publicDecks],
+    () => [...userDecks, ...sharedDecks, ...publicDecks],
+    [userDecks, sharedDecks, publicDecks],
   );
 
   const totalCards = useMemo(() => {
@@ -152,6 +155,9 @@ export function DeckSelection({
   const filteredUserDecks = filter(
     userDecks.filter((d) => !localFavorites.has(d.id)),
   );
+  const filteredSharedDecks = filter(
+    sharedDecks.filter((d) => !localFavorites.has(d.id)),
+  );
   const filteredPublicDecks = filter(
     publicDecks.filter((d) => !localFavorites.has(d.id)),
   );
@@ -161,6 +167,7 @@ export function DeckSelection({
     hasAnyDecks &&
     favoriteDecks.length === 0 &&
     filteredUserDecks.length === 0 &&
+    filteredSharedDecks.length === 0 &&
     filteredPublicDecks.length === 0;
 
   return (
@@ -239,6 +246,13 @@ export function DeckSelection({
               decks: filteredUserDecks,
               isPublic: false,
               showBadge: false,
+            },
+            {
+              icon: <Share2 className="w-3.5 h-3.5 text-muted-foreground" />,
+              label: "Shared with me",
+              decks: filteredSharedDecks,
+              isPublic: false,
+              showBadge: true,
             },
             {
               icon: <Globe className="w-3.5 h-3.5" />,

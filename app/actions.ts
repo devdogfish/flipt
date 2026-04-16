@@ -57,7 +57,7 @@ const resultMap: Record<string, "FORGOT" | "HARD" | "GOOD" | "EASY"> = {
 
 export async function recordUsage(
   cardId: string,
-  grade: "forgot" | "good",
+  grade: "forgot" | "hard" | "good" | "easy",
 ): Promise<void> {
   const { user } = await requireSession();
 
@@ -269,6 +269,75 @@ export async function deleteApiKey(keyId: string): Promise<void> {
   if (!apiKey || apiKey.userId !== user.id) throw new Error("Not found");
   await prisma.apiKey.delete({ where: { id: keyId } });
   revalidatePath("/settings");
+}
+
+// ── Deck sharing ─────────────────────────────────────────────────────────────
+
+export async function searchUsersForSharing(
+  query: string,
+): Promise<{ id: string; name: string | null; email: string }[]> {
+  await requireSession();
+  if (!query.trim()) return [];
+
+  return prisma.user.findMany({
+    where: {
+      OR: [
+        { name: { contains: query, mode: "insensitive" } },
+        { email: { contains: query, mode: "insensitive" } },
+      ],
+    },
+    select: { id: true, name: true, email: true },
+    take: 10,
+  });
+}
+
+export async function getDeckShares(
+  deckId: string,
+): Promise<{ userId: string; name: string | null; email: string; createdAt: string }[]> {
+  const { user } = await requireSession();
+  await assertOwner(deckId, user.id);
+
+  const shares = await prisma.deckShare.findMany({
+    where: { deckId },
+    include: { user: { select: { id: true, name: true, email: true } } },
+    orderBy: { createdAt: "asc" },
+  });
+
+  return shares.map((s) => ({
+    userId: s.user.id,
+    name: s.user.name,
+    email: s.user.email,
+    createdAt: s.createdAt.toISOString(),
+  }));
+}
+
+export async function shareDeckWithUser(
+  deckId: string,
+  userId: string,
+): Promise<void> {
+  const { user } = await requireSession();
+  await assertOwner(deckId, user.id);
+
+  if (userId === user.id) throw new Error("Cannot share a deck with yourself.");
+
+  await prisma.deckShare.upsert({
+    where: { deckId_userId: { deckId, userId } },
+    create: { deckId, userId },
+    update: {},
+  });
+
+  revalidatePath(`/decks/${deckId}`);
+}
+
+export async function unshareDeck(deckId: string, userId: string): Promise<void> {
+  const { user } = await requireSession();
+  await assertOwner(deckId, user.id);
+
+  await prisma.deckShare.deleteMany({
+    where: { deckId, userId },
+  });
+
+  revalidatePath(`/decks/${deckId}`);
 }
 
 // ── Dal verification ─────────────────────────────────────────────────────────

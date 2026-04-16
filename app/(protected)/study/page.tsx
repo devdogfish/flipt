@@ -34,7 +34,6 @@ export default async function StudyRoute({
 
   if (rawCards.length === 0) redirect("/decks")
 
-  // Fetch FSRS schedules for these cards
   const cardIds = rawCards.map((c) => c.id)
   const schedules = await prisma.cardSchedule.findMany({
     where: { userId: session.user.id, cardId: { in: cardIds } },
@@ -49,7 +48,6 @@ export default async function StudyRoute({
   })
 
   const scheduleByCard = new Map(schedules.map((s) => [s.cardId, s]))
-
   const now = Date.now()
 
   const cards = rawCards
@@ -70,14 +68,9 @@ export default async function StudyRoute({
       const aIsDue = !aIsNew && a.nextDue! <= now
       const bIsDue = !bIsNew && b.nextDue! <= now
 
-      // Due cards first (sorted by nextDue ascending — most overdue first)
       if (aIsDue !== bIsDue) return aIsDue ? -1 : 1
       if (aIsDue && bIsDue) return a.nextDue! - b.nextDue!
-
-      // New cards (no schedule) second
       if (aIsNew !== bIsNew) return aIsNew ? -1 : 1
-
-      // Not-yet-due last, sorted by nextDue ascending
       return (a.nextDue ?? 0) - (b.nextDue ?? 0)
     })
 

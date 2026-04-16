@@ -35,10 +35,10 @@ export function StudyPage({ cards }: StudyPageProps) {
   const currentCard = activeCards[currentIndex]
 
   const handleResult = useCallback(
-    (grade: "forgot" | "good") => {
+    (grade: "forgot" | "hard" | "good" | "easy") => {
       recordUsage(currentCard.id, grade)
 
-      const isCorrect = grade === "good"
+      const isCorrect = grade === "good" || grade === "easy"
       if (!isCorrect) {
         setWrongCards((prev) => [...prev, currentCard])
       } else {

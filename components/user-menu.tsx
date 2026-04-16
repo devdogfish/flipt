@@ -1,8 +1,9 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { useTheme } from "next-themes"
+import { bindTheme } from "ssr-themes/react"
 import { signOut } from "@/lib/auth-client"
+import { theme } from "@/app/theme"
 import Link from "next/link"
 import {
   DropdownMenu,
@@ -29,9 +30,11 @@ const THEMES = [
   { value: "dark", label: "Dark", icon: Moon },
 ] as const
 
+const { useTheme } = bindTheme(theme);
+
 export function UserMenu({ userName, userEmail, userImage }: UserMenuProps) {
   const router = useRouter()
-  const { theme, setTheme } = useTheme()
+  const { selected, setSelected } = useTheme()
 
   const initials = userName
     .split(" ")
@@ -46,7 +49,7 @@ export function UserMenu({ userName, userEmail, userImage }: UserMenuProps) {
   }
 
   function handleThemeChange(value: string) {
-    setTheme(value)
+    setSelected(value as "system" | "light" | "dark")
     const dbTheme = value.toUpperCase() as "SYSTEM" | "LIGHT" | "DARK"
     updateTheme(dbTheme)
   }
@@ -79,7 +82,7 @@ export function UserMenu({ userName, userEmail, userImage }: UserMenuProps) {
                   onClick={() => handleThemeChange(value)}
                   className={cn(
                     "flex-1 flex flex-col items-center gap-1 py-1.5 rounded-md text-xs transition-colors",
-                    theme === value
+                    selected === value
                       ? "bg-primary text-primary-foreground"
                       : "text-muted-foreground hover:bg-muted hover:text-foreground",
                   )}

@@ -1,5 +1,5 @@
 import { headers } from "next/headers"
-import { notFound, redirect } from "next/navigation"
+import { notFound } from "next/navigation"
 import Link from "next/link"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/db"
@@ -15,8 +15,6 @@ export default async function EditDeckPage({
   params: Promise<{ id: string }>
 }) {
   const session = await auth.api.getSession({ headers: await headers() })
-  if (!session) redirect("/sign-in")
-
   const { id } = await params
 
   const deck = await prisma.deck.findUnique({
@@ -25,17 +23,17 @@ export default async function EditDeckPage({
   })
 
   if (!deck) notFound()
-  if (deck.ownerId !== session.user.id) notFound()
+  if (!session || deck.ownerId !== session.user.id) notFound()
 
   return (
     <main className="min-h-svh px-5 py-16 pb-24">
       <div className="max-w-lg mx-auto">
         <Link
-          href="/decks"
+          href={`/decks/${deck.id}`}
           className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-10"
         >
           <ArrowLeft size={14} />
-          Back to decks
+          Back to deck
         </Link>
 
         <div className="mb-8">
@@ -43,7 +41,6 @@ export default async function EditDeckPage({
           <p className="text-sm text-muted-foreground">{deck.title}</p>
         </div>
 
-        {/* Deck metadata */}
         <section className="mb-10">
           <DeckMetadataForm
             mode="edit"
@@ -59,7 +56,6 @@ export default async function EditDeckPage({
 
         <Separator className="my-8" />
 
-        {/* Cards */}
         <section className="mb-10">
           <h2 className="text-base font-semibold mb-1">Cards</h2>
           <p className="text-sm text-muted-foreground mb-6">
@@ -79,7 +75,6 @@ export default async function EditDeckPage({
 
         <Separator className="my-8" />
 
-        {/* Danger zone */}
         <section>
           <h2 className="text-base font-semibold mb-1">Danger zone</h2>
           <p className="text-sm text-muted-foreground mb-4">

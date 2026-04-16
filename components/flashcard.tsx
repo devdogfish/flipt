@@ -14,7 +14,7 @@ interface FlashcardProps {
   category?: string;
   currentIndex: number;
   totalCards: number;
-  onResult: (grade: "forgot" | "good") => void;
+  onResult: (grade: GradeKey) => void;
   onSkip: () => void;
   onPrev: () => void;
   onWhooshPlayed?: (index: number) => void;

@@ -1,14 +1,8 @@
-import { headers } from "next/headers"
-import { redirect } from "next/navigation"
 import Link from "next/link"
-import { auth } from "@/lib/auth"
-import { DeckMetadataForm } from "@/components/deck-metadata-form"
 import { ArrowLeft } from "lucide-react"
+import { DeckMetadataForm } from "@/components/deck-metadata-form"
 
-export default async function NewDeckPage() {
-  const session = await auth.api.getSession({ headers: await headers() })
-  if (!session) redirect("/sign-in")
-
+export default function NewDeckPage() {
   return (
     <main className="min-h-svh px-5 py-16">
       <div className="max-w-lg mx-auto">

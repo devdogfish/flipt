@@ -18,3 +18,4 @@ node_modules
 /lib/generated/prisma
 .env
 .vercel
+tsconfig.tsbuildinfo

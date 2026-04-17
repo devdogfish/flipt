@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
-import { signUp, signIn } from "@/lib/auth-client";
+import { signUp } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -38,10 +38,6 @@ export default function SignUpPage() {
     setPending(false);
   }
 
-  async function handleMicrosoft() {
-    await signIn.social({ provider: "microsoft", callbackURL: "/" });
-  }
-
   if (verifyPending) {
     return (
       <div className="w-full max-w-sm">
@@ -69,17 +65,6 @@ export default function SignUpPage() {
         <h1 className="text-xl font-semibold tracking-tight">
           Create an account
         </h1>
-
-        <Button className="w-full" onClick={handleMicrosoft} type="button">
-          <MicrosoftIcon />
-          Continue with Dalhousie NetID
-        </Button>
-
-        <div className="flex items-center gap-3 text-xs text-muted-foreground">
-          <span className="flex-1 border-t border-border" />
-          or
-          <span className="flex-1 border-t border-border" />
-        </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
@@ -159,16 +144,5 @@ export default function SignUpPage() {
         </p>
       </div>
     </div>
-  );
-}
-
-function MicrosoftIcon() {
-  return (
-    <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M11.4 2H2v9.4h9.4V2z" fill="#F25022" />
-      <path d="M22 2h-9.4v9.4H22V2z" fill="#7FBA00" />
-      <path d="M11.4 12.6H2V22h9.4v-9.4z" fill="#00A4EF" />
-      <path d="M22 12.6h-9.4V22H22v-9.4z" fill="#FFB900" />
-    </svg>
   );
 }

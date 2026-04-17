@@ -55,10 +55,6 @@ export default async function RootLayout({
     >
       <body className="font-sans antialiased bg-background text-foreground min-h-svh">
         <Script src="/theme-init.js" strategy="beforeInteractive" />
-        <div className="w-full bg-amber-400 dark:bg-amber-500 text-amber-950 text-sm font-medium text-center px-4 py-2.5">
-          Flipt is currently under development — some features may be
-          unavailable or change without notice.
-        </div>
         <ThemeProvider>
           <DustOverlay />
           {sessionUser && (

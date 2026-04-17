@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
@@ -8,22 +8,6 @@ import { signIn, authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
-// ─── Debug: seed users (remove this block when no longer needed) ───────────
-const IS_DEV = process.env.NODE_ENV === "development";
-const SEED_USERS = [
-  {
-    label: "flashcardbrowser (seed)",
-    email: "seed@flashcardbrowser.com",
-    password: "flashcardbrowser1234",
-  },
-  {
-    label: "Marcus",
-    email: "marcus@flashcardbrowser.com",
-    password: "marcus1234",
-  },
-];
-// ──────────────────────────────────────────────────────────────────────────
 
 type Mode = "password" | "magic-link";
 
@@ -36,23 +20,6 @@ export default function SignInPage() {
   const [magicLinkSent, setMagicLinkSent] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [pending, setPending] = useState(false);
-
-  // ── Debug: auto-fill first seed user on mount ──────────────────────────
-  useEffect(() => {
-    if (IS_DEV) {
-      setEmail(SEED_USERS[0].email);
-      setPassword(SEED_USERS[0].password);
-    }
-  }, []);
-
-  function handleDebugUserSelect(e: React.ChangeEvent<HTMLSelectElement>) {
-    const user = SEED_USERS.find((u) => u.email === e.target.value);
-    if (user) {
-      setEmail(user.email);
-      setPassword(user.password);
-    }
-  }
-  // ──────────────────────────────────────────────────────────────────────
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -85,10 +52,6 @@ export default function SignInPage() {
     setPending(false);
   }
 
-  async function handleMicrosoft() {
-    await signIn.social({ provider: "microsoft", callbackURL: "/" });
-  }
-
   if (magicLinkSent) {
     return (
       <div className="w-full max-w-sm">
@@ -116,37 +79,6 @@ export default function SignInPage() {
     <div className="w-full max-w-sm">
       <div className="rounded-3xl bg-card dark:bg-zinc-900 shadow-[0_2px_40px_-12px_rgba(0,0,0,0.15)] dark:shadow-none dark:border dark:border-white/20 p-8 space-y-6">
         <h1 className="text-xl font-semibold tracking-tight">Sign in</h1>
-
-        <Button className="w-full" onClick={handleMicrosoft} type="button">
-          <MicrosoftIcon />
-          Continue with Dalhousie NetID
-        </Button>
-
-        <div className="flex items-center gap-3 text-xs text-muted-foreground">
-          <span className="flex-1 border-t border-border" />
-          or
-          <span className="flex-1 border-t border-border" />
-        </div>
-
-        {/* ── Debug panel (dev only) ── */}
-        {IS_DEV && (
-          <div className="rounded-lg border border-yellow-500/40 bg-yellow-500/10 px-3 py-2 space-y-1">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-yellow-500/80">
-              Dev · Seed user
-            </p>
-            <select
-              className="w-full rounded-md bg-transparent text-sm text-foreground border border-yellow-500/30 px-2 py-1 focus:outline-none"
-              value={email}
-              onChange={handleDebugUserSelect}
-            >
-              {SEED_USERS.map((u) => (
-                <option key={u.email} value={u.email}>
-                  {u.label} — {u.email}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
@@ -240,16 +172,5 @@ export default function SignInPage() {
         </p>
       </div>
     </div>
-  );
-}
-
-function MicrosoftIcon() {
-  return (
-    <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M11.4 2H2v9.4h9.4V2z" fill="#F25022" />
-      <path d="M22 2h-9.4v9.4H22V2z" fill="#7FBA00" />
-      <path d="M11.4 12.6H2V22h9.4v-9.4z" fill="#00A4EF" />
-      <path d="M22 12.6h-9.4V22H22v-9.4z" fill="#FFB900" />
-    </svg>
   );
 }

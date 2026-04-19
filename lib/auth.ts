@@ -18,51 +18,45 @@ const FROM_LUIGI = "Luigi from flashcardbrowser <luigi@flashcardbrowser.com>";
 const APP_NAME = "flashcardbrowser";
 
 function emailButton(url: string, label: string) {
-  return `<a href="${url}" style="display:inline-block;background:#FFD400;color:#000;font-weight:600;padding:12px 28px;border-radius:6px;text-decoration:none;font-family:sans-serif;">${label}</a>`;
+  return `<a href="${url}" style="display:inline-block;background:#FFD400;color:#1a1a1a;font-weight:600;font-size:14px;padding:11px 24px;border-radius:20px;text-decoration:none;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;letter-spacing:-0.01em;">${label}</a>`;
 }
 
 function emailWrapper(body: string, url: string) {
-  return `<!DOCTYPE html><html><body style="background:#f5f5f5;margin:0;padding:40px 0;font-family:sans-serif;">
-<div style="max-width:480px;margin:0 auto;background:#fff;border-radius:10px;overflow:hidden;">
-  <div style="background:#000;padding:24px 32px;">
-    <span style="color:#FFD400;font-size:20px;font-weight:700;letter-spacing:-0.5px;">flashcardbrowser.</span>
+  return `<!DOCTYPE html>
+<html>
+<head><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="background:#f9f8f6;margin:0;padding:48px 16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+<div style="max-width:480px;margin:0 auto;">
+  <div style="margin-bottom:28px;">
+    <span style="font-size:16px;font-weight:700;letter-spacing:-0.5px;color:#1a1a1a;">flashcardbrowser<span style="color:#FFD400;">.</span></span>
   </div>
-  <div style="padding:32px;">
+  <div style="background:#fff;border-radius:16px;padding:36px;border:1px solid #e8e6e1;">
     ${body}
-    <p style="color:#aaa;font-size:12px;margin-top:32px;">Or copy and paste this link into your browser:<br>
-    <span style="color:#555;word-break:break-all;">${url}</span></p>
-    <p style="color:#aaa;font-size:12px;margin-top:16px;">If you didn't request this, you can safely ignore this email.</p>
+    <div style="margin-top:28px;padding-top:20px;border-top:1px solid #f0ede8;">
+      <p style="color:#999;font-size:12px;margin:0 0 6px;">Or paste this link into your browser:</p>
+      <p style="color:#bbb;font-size:11px;margin:0;word-break:break-all;">${url}</p>
+    </div>
   </div>
+  <p style="color:#bbb;font-size:11px;text-align:center;margin:20px 0 0;">If you didn't request this, ignore this email.</p>
 </div>
 </body></html>`;
 }
 
 function welcomeEmailHtml(name: string) {
   const firstName = name?.split(" ")[0] || "there";
-  return `<!DOCTYPE html><html><body style="background:#f5f5f5;margin:0;padding:40px 0;font-family:sans-serif;">
-<div style="max-width:480px;margin:0 auto;background:#fff;border-radius:10px;overflow:hidden;">
-  <div style="background:#000;padding:24px 32px;">
-    <span style="color:#FFD400;font-size:20px;font-weight:700;letter-spacing:-0.5px;">flashcardbrowser.</span>
-  </div>
-  <div style="padding:32px;">
-    <p style="color:#111;font-size:16px;margin:0 0 16px;">Hey ${firstName},</p>
-    <p style="color:#333;font-size:15px;line-height:1.6;margin:0 0 16px;">
-      My name is Luigi — I built flashcardbrowser. Thanks for signing up, it genuinely means a lot.
-    </p>
-    <p style="color:#333;font-size:15px;line-height:1.6;margin:0 0 16px;">
-      The whole point of flashcardbrowser is to build a shared index of flashcard decks that's extremely specific to Dal courses —
-      so students don't have to recreate the same decks from scratch every year. You study smarter, and whatever you contribute stays useful for the next person.
-    </p>
-    <p style="color:#333;font-size:15px;line-height:1.6;margin:0 0 16px;">
-      I'd love to know what would make flashcardbrowser your go-to study tool. What's missing? What would make you actually use it every week?
-    </p>
-    <p style="color:#333;font-size:15px;line-height:1.6;margin:0 0 24px;">
-      Hit reply and let me know — I read every response personally.
-    </p>
-    <p style="color:#111;font-size:15px;margin:0;">— Luigi<br>
-    <span style="color:#aaa;font-size:13px;">Creator of flashcardbrowser &nbsp;·&nbsp; <a href="https://flashcardbrowser.com" style="color:#aaa;">flashcardbrowser.com</a></span></p>
-  </div>
-</div>
+  return `<!DOCTYPE html><html><body style="font-family:sans-serif;font-size:15px;line-height:1.6;color:#111;max-width:560px;margin:40px auto;padding:0 16px;">
+<p>Hey ${firstName},</p>
+<p>My name is Luigi — I built <a href="https://flashcardbrowser.com">Flashcardbrowser</a>.</p>
+<p>The idea is simple: a shared library of flashcard decks specific to Dal courses, so students don't have to rebuild the same material from scratch every semester.</p>
+<p>Here are 3 things to get started:</p>
+<ol>
+  <li><a href="https://flashcardbrowser.com/decks">Browse decks for your Dal courses</a></li>
+  <li><a href="https://flashcardbrowser.com/decks/new">Create a deck for a course you're enrolled in</a></li>
+  <li><a href="https://flashcardbrowser.com/decks/import">Generate cards from your lecture notes with AI</a></li>
+</ol>
+<p><strong>P.S.: What brought you here? And what would you like to see in Flashcardbrowser in the future?</strong></p>
+<p>Hit "Reply" and let me know. I read and reply to every email.</p>
+<p>Cheers,<br>Luigi</p>
 </body></html>`;
 }
 

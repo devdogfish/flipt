@@ -1,6 +1,7 @@
+import { Suspense } from "react"
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
-import { DeckMetadataForm } from "@/components/deck-metadata-form"
+import { NewDeckTabs } from "@/components/new-deck-tabs"
 
 export default function NewDeckPage() {
   return (
@@ -17,11 +18,13 @@ export default function NewDeckPage() {
         <div className="mb-8">
           <h1 className="text-2xl font-semibold tracking-tight mb-1">New deck</h1>
           <p className="text-sm text-muted-foreground">
-            Create a deck, then add cards on the next screen.
+            Create manually or generate from a document.
           </p>
         </div>
 
-        <DeckMetadataForm mode="create" />
+        <Suspense>
+          <NewDeckTabs />
+        </Suspense>
       </div>
     </main>
   )

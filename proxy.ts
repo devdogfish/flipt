@@ -29,7 +29,20 @@ function isPublicRoute(pathname: string): boolean {
 }
 
 export async function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  const { pathname, method } = request.nextUrl as unknown as { pathname: string; method: string };
+  const httpMethod = request.method;
+
+  // For large POST/PUT requests (e.g. server actions with file uploads),
+  // skip the body entirely — auth is checked via cookies in the server action itself.
+  // We still enforce auth for GET requests via the session check below.
+  if ((httpMethod === "POST" || httpMethod === "PUT") && !isPublicRoute(pathname)) {
+    const hasCookie = request.cookies.has("better-auth.session_token") ||
+      request.cookies.has("__Secure-better-auth.session_token");
+    if (!hasCookie) {
+      return NextResponse.redirect(new URL("/auth/sign-in", request.url));
+    }
+    return NextResponse.next();
+  }
 
   if (isPublicRoute(pathname)) {
     // Redirect authenticated users away from /auth/* pages

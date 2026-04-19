@@ -11,13 +11,12 @@
     "db:start": "docker start flashcardbrowser-db 2>/dev/null || docker run --name flashcardbrowser-db -e POSTGRES_HOST_AUTH_METHOD=trust -e POSTGRES_USER=postgres -e POSTGRES_DB=flashcardbrowser -p 5432:5432 -d postgres",
     "db:stop": "docker stop flashcardbrowser-db",
     "db:seed": "bun run prisma/seed.ts",
-    "db:reseed": "bunx prisma migrate reset && bun run db:seed",
-    "db:push-prod": "export $(grep '^DATABASE_URL' .env.local | xargs) && bunx prisma db push --force-reset",
-    "db:seed-prod": "export $(grep '^DATABASE_URL' .env.local | xargs) && NODE_NO_WARNINGS=1 bun run prisma/seed.ts",
-    "db:reset-prod": "vercel env pull .env.local --environment=production && bun run db:push-prod && bun run db:seed-prod"
+    "db:reset": "bunx prisma db push --force-reset && bun run prisma/seed.ts",
+    "db:reset:production": "vercel env pull .env.local --environment=production && export $(grep '^DATABASE_URL' .env.local | xargs) && bunx prisma db push --force-reset && NODE_NO_WARNINGS=1 bun run prisma/seed.ts"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.64",
+    "@ai-sdk/openai": "^3.0.53",
     "@hookform/resolvers": "^3.9.1",
     "@mdx-js/loader": "^3.1.1",
     "@mdx-js/mdx": "^3.1.1",
@@ -64,8 +63,10 @@
     "embla-carousel-react": "8.6.0",
     "input-otp": "1.4.2",
     "lucide-react": "^0.564.0",
+    "mammoth": "^1.12.0",
     "motion": "^12.38.0",
     "next": "16.2.0",
+    "pdf-parse": "^2.4.5",
     "pg": "^8.20.0",
     "react": "19.2.4",
     "react-day-picker": "9.13.2",
@@ -77,6 +78,7 @@
     "sonner": "^1.7.1",
     "ssr-themes": "^0.3.2",
     "tailwind-merge": "^3.3.1",
+    "unpdf": "^1.6.0",
     "vaul": "^1.1.2",
     "vercel": "^50.41.0",
     "zod": "^3.24.1"

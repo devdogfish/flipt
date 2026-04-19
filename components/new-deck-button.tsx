@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Plus, PenLine, Upload } from "lucide-react";
+import { Plus, PenLine, Upload, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -28,6 +28,15 @@ export function NewDeckButton() {
           >
             <PenLine className="w-4 h-4 text-muted-foreground" />
             Create from scratch
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link
+            href="/decks/new?tab=generate"
+            className="flex items-center gap-2.5 cursor-pointer"
+          >
+            <Sparkles className="w-4 h-4 text-muted-foreground" />
+            Generate with AI
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />

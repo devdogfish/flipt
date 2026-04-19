@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { put, list } from "@vercel/blob";
+import { put } from "@vercel/blob";
 import { schedule, type Grade } from "@/lib/fsrs";
 
 async function requireSession() {
@@ -165,6 +165,7 @@ async function buildImagePrompt(
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
+        temperature: 1.0,
         messages: [
           {
             role: "system",
@@ -279,6 +280,7 @@ export async function generateCoverImage(
           image_size: "landscape_4_3",
           num_inference_steps: 4,
           output_format: "jpeg",
+          seed: Math.floor(Math.random() * 2147483647),
         }),
       },
     );
@@ -309,7 +311,7 @@ export async function generateCoverImage(
             Authorization: `Bearer ${cfApiToken}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ prompt, steps: 8 }),
+          body: JSON.stringify({ prompt, steps: 8, seed: Math.floor(Math.random() * 2147483647) }),
         },
       );
 
@@ -331,17 +333,7 @@ export async function generateCoverImage(
 }
 
 async function uploadCoverBytes(bytes: ArrayBuffer): Promise<{ url: string }> {
-  const hashBuffer = await crypto.subtle.digest("SHA-256", bytes);
-  const hash = Array.from(new Uint8Array(hashBuffer))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("")
-    .slice(0, 16);
-  const filename = `covers/ai-${hash}.jpg`;
-
-  const { blobs } = await list({ prefix: filename, limit: 1 });
-  if (blobs.length > 0) {
-    return { url: blobs[0].url };
-  }
+  const filename = `covers/ai-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
 
   const blob = await put(filename, bytes, {
     access: "public",
@@ -781,6 +773,100 @@ export async function deleteAccount(): Promise<void> {
   });
   await prisma.user.delete({ where: { id: user.id } });
   redirect("/auth/sign-in");
+}
+
+// ── AI flashcard generation ───────────────────────────────────────────────────
+
+export type GeneratedCard = {
+  question: string;
+  answer: string;
+};
+
+export type GenerateFlashcardsResult = {
+  deckTitle: string;
+  deckDescription: string;
+  cards: GeneratedCard[];
+};
+
+export async function generateFlashcardsFromDocument(
+  formData: FormData,
+): Promise<GenerateFlashcardsResult> {
+  await requireSession();
+
+  const files = formData.getAll("file") as File[];
+  if (files.length === 0) throw new Error("No files provided");
+
+  const MAX_BYTES = 10 * 1024 * 1024;
+  const { extractTextFromFile } = await import("@/lib/document-extract");
+
+  const textParts: string[] = [];
+  for (const file of files) {
+    if (file.size > MAX_BYTES) continue; // skip oversized files
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const { text } = await extractTextFromFile(buffer, file.name, file.type);
+    if (text.trim()) {
+      textParts.push(`--- ${file.name} ---\n${text.trim()}`);
+    }
+  }
+
+  const combinedText = textParts.join("\n\n");
+
+  if (combinedText.trim().length < 50) {
+    throw new Error(
+      "We couldn't read enough content from these files. Try a different format.",
+    );
+  }
+
+  const { generateFlashcards } = await import("@/lib/flashcard-generate");
+  const result = await generateFlashcards(combinedText);
+
+  // Sanitize model output — strip leading punctuation/whitespace the model sometimes emits
+  const cleanTitle = result.deckTitle.replace(/^[\s:,.\-–—]+|[\s:,.\-–—]+$/g, "").trim();
+  const cleanDescription = result.deckDescription.replace(/^[\s:,.\-–—]+|[\s:,.\-–—]+$/g, "").trim();
+
+  return {
+    deckTitle: cleanTitle || "Untitled Deck",
+    deckDescription: cleanDescription,
+    cards: result.cards
+      .filter((c) => c.question.trim().length > 3 && c.answer.trim().length > 3)
+      .map((c) => ({
+        question: c.question.trim(),
+        answer: c.answer.trim(),
+      })),
+  };
+}
+
+export async function saveDeckFromGeneration(data: {
+  title: string;
+  description: string;
+  coverImage: string | null;
+  visibility: "PRIVATE" | "PUBLIC";
+  cards: { question: string; answer: string }[];
+}): Promise<void> {
+  const { user } = await requireSession();
+  if (!data.title.trim()) throw new Error("Title is required");
+
+  const deck = await prisma.deck.create({
+    data: {
+      ownerId: user.id,
+      title: data.title.trim(),
+      description: data.description.trim() || null,
+      visibility: data.visibility,
+      coverImage: data.coverImage || null,
+    },
+  });
+
+  await prisma.flashcard.createMany({
+    data: data.cards.map((card, i) => ({
+      deckId: deck.id,
+      question: card.question,
+      answer: card.answer,
+      position: i,
+    })),
+  });
+
+  revalidatePath("/decks");
+  redirect(`/decks/${deck.id}/edit`);
 }
 
 // ── Deck import ──────────────────────────────────────────────────────────────

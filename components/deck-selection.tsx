@@ -343,20 +343,20 @@ export function DeckSelection({
         </div>
       )}
 
-      {/* Search + Sort */}
-      {hasAnyDecks && (
-        <div className="flex items-center gap-3 mb-10">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-            <Input
-              ref={searchRef}
-              type="text"
-              placeholder="Search decks…"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="pl-9"
-            />
-          </div>
+      {/* Search + Sort + New deck */}
+      <div className="flex items-center gap-3 mb-10">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+          <Input
+            ref={searchRef}
+            type="text"
+            placeholder="Search decks…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+        {hasAnyDecks && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm" className="h-9 gap-2 shrink-0">
@@ -372,7 +372,8 @@ export function DeckSelection({
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>
           </DropdownMenu>
-          <NewDeckButton />
+        )}
+        <NewDeckButton />
           {process.env.NEXT_PUBLIC_VERCEL_ENV !== "production" && (
             <Button
               variant="outline"
@@ -397,7 +398,6 @@ export function DeckSelection({
             </Button>
           )}
         </div>
-      )}
       {regenStatus && regenStatus !== "running" && (
         <p className="text-xs text-muted-foreground mb-4">{regenStatus}</p>
       )}

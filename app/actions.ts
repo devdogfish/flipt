@@ -773,6 +773,16 @@ export async function updateDisplayName(name: string): Promise<void> {
   revalidatePath("/settings");
 }
 
+export async function deleteAccount(): Promise<void> {
+  const { user } = await requireSession();
+  // Delete private decks first; public/course decks will have ownerId set to null via SetNull cascade
+  await prisma.deck.deleteMany({
+    where: { ownerId: user.id, visibility: "PRIVATE" },
+  });
+  await prisma.user.delete({ where: { id: user.id } });
+  redirect("/auth/sign-in");
+}
+
 // ── Deck import ──────────────────────────────────────────────────────────────
 
 export type ImportCardData = {

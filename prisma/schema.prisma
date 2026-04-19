@@ -113,7 +113,7 @@ model UserSettings {
 
 model Deck {
   id          String     @id @default(cuid())
-  ownerId     String
+  ownerId     String?
   title       String
   description String?
   coverImage  String?
@@ -124,7 +124,7 @@ model Deck {
   deckType    DeckType   @default(PERSONAL)
   courseCode  String?
 
-  owner       User             @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  owner       User?            @relation(fields: [ownerId], references: [id], onDelete: SetNull)
   cards       Flashcard[]
   favorites   DeckFavorite[]
   shares      DeckShare[]

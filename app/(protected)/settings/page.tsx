@@ -8,6 +8,7 @@ import { ArrowLeft } from "lucide-react"
 import { SettingsProfileForm } from "@/components/settings-profile-form"
 import { SettingsThemeSelector } from "@/components/settings-theme-selector"
 import { SettingsApiKeys } from "@/components/settings-api-keys"
+import { SettingsDeleteAccount } from "@/components/settings-delete-account"
 
 export default async function SettingsPage() {
   const session = await auth.api.getSession({ headers: await headers() })
@@ -62,6 +63,15 @@ export default async function SettingsPage() {
               lastUsedAt: k.lastUsedAt?.toISOString() ?? null,
             }))}
           />
+        </section>
+
+        <Separator className="my-8" />
+
+        <section>
+          <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-widest mb-5">
+            Danger Zone
+          </h2>
+          <SettingsDeleteAccount />
         </section>
       </div>
     </main>

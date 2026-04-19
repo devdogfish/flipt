@@ -726,8 +726,8 @@ export async function sendDalVerification(dalEmail: string): Promise<void> {
   await resend.emails.send({
     from: "noreply@flashcardbrowser.com",
     to: normalised,
-    subject: "Verify your Dalhousie email for Flipt",
-    text: `Click the link below to link your Dal email to your Flipt account. This link expires in 1 hour.\n\n${confirmUrl}`,
+    subject: "Verify your Dalhousie email for flashcardbrowser",
+    text: `Click the link below to link your Dal email to your flashcardbrowser account. This link expires in 1 hour.\n\n${confirmUrl}`,
   });
 }
 

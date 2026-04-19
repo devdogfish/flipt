@@ -19,6 +19,7 @@ export default async function OnboardingPage({
   // Already fully onboarded — send them to the app
   if (user.fieldOfStudy && user.dalEmail) redirect("/");
 
+  const needsDalVerification = !user.dalEmail;
   const initialStep = user.fieldOfStudy ? 1 : 0;
 
   const { error } = await searchParams;
@@ -31,7 +32,11 @@ export default async function OnboardingPage({
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
-      <OnboardingFlow initialStep={initialStep} verifyError={verifyError} />
+      <OnboardingFlow
+        initialStep={initialStep}
+        needsDalVerification={needsDalVerification}
+        verifyError={verifyError}
+      />
     </div>
   );
 }

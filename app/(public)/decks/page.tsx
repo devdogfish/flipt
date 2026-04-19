@@ -5,12 +5,11 @@ import { prisma } from "@/lib/db";
 import { DeckSelection } from "@/components/deck-selection";
 import { PublicDecksBrowse } from "@/components/public-decks-browse";
 import { PageLayout } from "@/components/page-layout";
-import type { CourseCollectionData } from "@/components/deck-selection";
 
 export const metadata: Metadata = {
-  title: "Browse Decks — flashcardbrowser",
+  title: "Decks — flashcardbrowser",
   description:
-    "Discover community flashcard decks for Dalhousie students. Browse, search, and study public decks across all subjects.",
+    "Your personal flashcard decks, shared decks, and community decks.",
 };
 
 export default async function DecksPage() {
@@ -18,27 +17,13 @@ export default async function DecksPage() {
     .getSession({ headers: await headers() })
     .catch(() => null);
 
-  const courseCollectionsRaw = await prisma.collection.findMany({
-    where: { courseCode: { not: null } },
-    include: { _count: { select: { decks: true } } },
-    orderBy: { courseCode: "asc" },
-  });
-
-  const courseCollections: CourseCollectionData[] = courseCollectionsRaw.map((c) => ({
-    id: c.id,
-    name: c.name,
-    courseCode: c.courseCode!,
-    deckCount: c._count.decks,
-  }));
-
   if (session) {
-    const [userDecks, sharedDecks, publicDecks, favorites, collections] =
+    const [userDecks, sharedDecks, publicDecks, favorites] =
       await Promise.all([
         prisma.deck.findMany({
           where: { ownerId: session.user.id, deckType: { not: "COURSE" } },
           include: {
             _count: { select: { cards: true } },
-            collections: { select: { collectionId: true } },
           },
           orderBy: { updatedAt: "desc" },
         }),
@@ -70,11 +55,6 @@ export default async function DecksPage() {
           where: { userId: session.user.id },
           select: { deckId: true },
         }),
-        prisma.collection.findMany({
-          where: { userId: session.user.id, courseCode: null },
-          include: { decks: { select: { deckId: true } } },
-          orderBy: { createdAt: "asc" },
-        }),
       ]);
 
     const favoriteIds = new Set(favorites.map((f) => f.deckId));
@@ -83,7 +63,7 @@ export default async function DecksPage() {
       id: string; title: string; description: string | null; coverImage: string | null;
       createdAt: Date; visibility: string; _count: { cards: number };
       owner?: { name: string | null } | null;
-    }, collectionIds?: string[]) => ({
+    }) => ({
       id: d.id,
       title: d.title,
       description: d.description ?? "",
@@ -92,18 +72,15 @@ export default async function DecksPage() {
       ownerName: d.owner?.name ?? null,
       createdAt: d.createdAt.toISOString(),
       isPublic: d.visibility === "PUBLIC",
-      collectionIds: collectionIds ?? [],
     });
 
     return (
       <PageLayout title="Your decks" subtitle="Your decks, shared decks, and community decks" maxWidth="max-w-4xl">
         <DeckSelection
-          userDecks={userDecks.map((d) => toRow(d, d.collections.map((c) => c.collectionId)))}
+          userDecks={userDecks.map((d) => toRow(d))}
           sharedDecks={sharedDecks.map((s) => ({ ...toRow({ ...s.deck, visibility: s.deck.visibility }), isShared: true }))}
           publicDecks={publicDecks.map((d) => toRow(d))}
           favoriteIds={[...favoriteIds]}
-          collections={collections.map((c) => ({ id: c.id, name: c.name, deckIds: c.decks.map((d) => d.deckId) }))}
-          courseCollections={courseCollections}
         />
       </PageLayout>
     );
@@ -128,7 +105,6 @@ export default async function DecksPage() {
           ownerName: d.owner?.name ?? null,
           createdAt: d.createdAt.toISOString(),
         }))}
-        courseCollections={courseCollections}
       />
     </PageLayout>
   );

@@ -7,7 +7,6 @@ import Link from "next/link";
 import {
   Upload,
   FileJson,
-  ArrowLeft,
   ArrowRight,
   AlertCircle,
   ImageIcon,
@@ -266,27 +265,7 @@ export function DeckImport() {
   const imageCount = parsed?.cards.filter((c) => c.imageUrl).length ?? 0;
 
   return (
-    <main className="min-h-svh px-5 py-16">
-      <div className="max-w-lg mx-auto">
-        <Link
-          href="/decks"
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-10"
-        >
-          <ArrowLeft size={14} />
-          Back to decks
-        </Link>
-
-        <div className="mb-8">
-          <h1 className="text-2xl font-semibold tracking-tight mb-1">
-            Import deck
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Upload a JSON file to create a deck. Card images are automatically
-            saved.
-          </p>
-        </div>
-
-        <AnimatePresence mode="wait">
+    <AnimatePresence mode="wait">
           {/* ── Idle: drop zone or paste ─────────────────────────────── */}
           {step === "idle" && (
             <motion.div
@@ -574,8 +553,6 @@ export function DeckImport() {
               </div>
             </motion.div>
           )}
-        </AnimatePresence>
-      </div>
-    </main>
+    </AnimatePresence>
   );
 }

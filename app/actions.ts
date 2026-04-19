@@ -7,6 +7,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { put } from "@vercel/blob";
 import { schedule, type Grade } from "@/lib/fsrs";
+import { emailButton, emailWrapper } from "@/lib/email";
 
 async function requireSession() {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -727,21 +728,11 @@ export async function sendDalVerification(dalEmail: string): Promise<void> {
     from: "noreply@flashcardbrowser.com",
     to: normalised,
     subject: "Verify your Dalhousie email for flashcardbrowser",
-    html: `<!DOCTYPE html><html><body style="background:#f5f5f5;margin:0;padding:40px 0;font-family:sans-serif;">
-<div style="max-width:480px;margin:0 auto;background:#fff;border-radius:10px;overflow:hidden;">
-  <div style="background:#000;padding:24px 32px;">
-    <span style="color:#FFD400;font-size:20px;font-weight:700;letter-spacing:-0.5px;">flashcardbrowser.</span>
-  </div>
-  <div style="padding:32px;">
-    <h2 style="margin:0 0 8px;font-size:22px;">Verify your Dal email</h2>
-    <p style="color:#555;margin:0 0 24px;">Click the link below to link your Dal email to your flashcardbrowser account. This link expires in 1 hour.</p>
-    <a href="${confirmUrl}" style="display:inline-block;background:#FFD400;color:#000;font-weight:600;padding:12px 28px;border-radius:6px;text-decoration:none;font-family:sans-serif;">Verify Dal email</a>
-    <p style="color:#aaa;font-size:12px;margin-top:32px;">Or copy and paste this link into your browser:<br>
-    <a href="${confirmUrl}" style="color:#555;word-break:break-all;">${confirmUrl}</a></p>
-    <p style="color:#aaa;font-size:12px;margin-top:16px;">If you didn't request this, you can safely ignore this email.</p>
-  </div>
-</div>
-</body></html>`,
+    html: emailWrapper(`
+      <h2 style="margin:0 0 8px;font-size:22px;">Verify your Dal email</h2>
+      <p style="color:#555;margin:0 0 24px;">Click the link below to link your Dal email to your flashcardbrowser account. This link expires in 1 hour.</p>
+      ${emailButton(confirmUrl, "Verify Dal email")}
+    `, confirmUrl),
     text: `Verify your Dal email\n\nClick the link below to link your Dal email to your flashcardbrowser account. This link expires in 1 hour.\n\n${confirmUrl}\n\nIf you didn't request this, you can safely ignore this email.`,
   });
 }
@@ -953,4 +944,51 @@ export async function importDeck(
 
   revalidatePath("/decks");
   return { deckId: deck.id };
+}
+
+// ── Course pinning ────────────────────────────────────────────────────────────
+
+export async function pinCourse(collectionId: string): Promise<void> {
+  const { user } = await requireSession();
+  await prisma.pinnedCourse.upsert({
+    where: { userId_collectionId: { userId: user.id, collectionId } },
+    create: { userId: user.id, collectionId },
+    update: {},
+  });
+  revalidatePath("/courses");
+}
+
+export async function unpinCourse(collectionId: string): Promise<void> {
+  const { user } = await requireSession();
+  await prisma.pinnedCourse.deleteMany({
+    where: { userId: user.id, collectionId },
+  });
+  revalidatePath("/courses");
+}
+
+// ── Course requests ───────────────────────────────────────────────────────────
+
+export async function createCourseRequest(
+  courseCode: string,
+  courseName: string,
+  notes?: string,
+): Promise<void> {
+  const { user } = await requireSession();
+
+  const code = courseCode.trim().toUpperCase();
+  const name = courseName.trim();
+  if (!code) throw new Error("Course code is required");
+  if (!name) throw new Error("Course name is required");
+
+  const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const recentCount = await prisma.courseRequest.count({
+    where: { userId: user.id, createdAt: { gte: since } },
+  });
+  if (recentCount >= 3) {
+    throw new Error("You can submit at most 3 course requests per day");
+  }
+
+  await prisma.courseRequest.create({
+    data: { userId: user.id, courseCode: code, courseName: name, notes: notes?.trim() || null },
+  });
 }

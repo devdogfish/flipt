@@ -23,7 +23,10 @@ export const metadata: Metadata = {
   description: "A minimalist flashcard experience",
   manifest: "/manifest.json",
   icons: {
-    icon: "/logo.png",
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/logo.png", type: "image/png" },
+    ],
     apple: "/logo.png",
   },
 };

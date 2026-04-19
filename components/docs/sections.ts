@@ -5,7 +5,11 @@ export interface DocSection {
 }
 
 export const DOCS_SECTIONS: DocSection[] = [
-  { id: "generate-with-any-ai",        depth: 2, title: "Generate with any AI" },
+  { id: "what-s-what",                 depth: 2, title: "What's what" },
+  { id: "three-ways-to-create-a-deck", depth: 2, title: "Three ways to create a deck" },
+  { id: "1-generate-with-ai-right-inside-the-app", depth: 3, title: "Generate with AI" },
+  { id: "2-use-any-ai-outside-the-app-then-import", depth: 3, title: "Use any AI, then import" },
+  { id: "3-use-the-api-directly",      depth: 3, title: "Use the API directly" },
   { id: "authentication",              depth: 2, title: "Authentication" },
   { id: "decks",                       depth: 2, title: "Decks" },
   { id: "list-your-decks",             depth: 3, title: "List your decks" },
@@ -13,6 +17,7 @@ export const DOCS_SECTIONS: DocSection[] = [
   { id: "get-a-deck",                  depth: 3, title: "Get a deck" },
   { id: "update-a-deck",               depth: 3, title: "Update a deck" },
   { id: "delete-a-deck",               depth: 3, title: "Delete a deck" },
+  { id: "export-a-deck",               depth: 3, title: "Export a deck" },
   { id: "cards",                       depth: 2, title: "Cards" },
   { id: "list-cards",                  depth: 3, title: "List cards" },
   { id: "add-a-card",                  depth: 3, title: "Add a card" },

@@ -13,15 +13,42 @@ import {
   COURSE_COLLECTION_CREATE_BODY, COURSE_COLLECTION_CREATE_RESPONSE,
   COLLECTION_PATCH_BODY, COLLECTION_PATCH_RESPONSE,
   COLLECTION_ADD_DECK_RESPONSE,
+  DECK_EXPORT_RESPONSE,
 } from "@/content/docs-samples";
 
-Flashcardbrowser turns any topic into a set of flashcards, and you don't need to write a single line of code to do it. You can ask any AI assistant to generate a deck for you and upload the result in seconds. If you're a developer or want to automate things, there's also a full REST API you can call from scripts, tools, or your own apps.
+## What's what
 
-## Generate with any AI
+Before anything else — here's how the pieces fit together.
 
-Copy the prompt below, replace `[TOPIC]` with your subject, paste it into any AI (ChatGPT, Claude, Gemini — any of them), then upload the JSON result on the [import page](/decks/import).
+**Cards** are the individual question-and-answer pairs. Every card has a front (the question or prompt) and a back (the answer).
+
+**Decks** are collections of cards on a single topic — like "PSYC 1011 Midterm" or "Organic Chemistry: Reactions." You study a deck, share a deck, and manage cards inside a deck.
+
+**Courses** are Dal course pages, like BIOL 1010 or STAT 1060. Each course page shows all the public decks Dal students have contributed for that course. You don't own a course — it's a shared community space. Anyone can add their deck to a course, and the community helps keep the cards accurate.
+
+**Collections** are your own private folders. If you want to group your personal decks together (e.g. "Fall semester" or "Finals prep"), you can put them in a collection. Collections are just for your own organization — they're not visible to anyone else.
+
+---
+
+## Three ways to create a deck
+
+### 1. Generate with AI — right inside the app
+
+Go to [New deck](/decks/new) and pick the **Generate with AI** tab. Paste in your lecture notes, slides, or any study material and the app will turn it into a full deck instantly. This is the fastest option for most people — no copying prompts, no uploading files.
+
+### 2. Use any AI outside the app, then import
+
+If you'd rather use ChatGPT, Claude, Gemini, or any other AI on your own, use the prompt template below. Copy it, replace `[TOPIC]` with your subject, and paste it into any AI. It will output a JSON file in exactly the right format. Then go to [New deck → Import JSON](/decks/new?tab=import) and drop the file in (or paste the JSON directly).
+
+This is useful when you want more control over the prompt, or when you already have a long document open in another AI tool.
 
 <CodeBlock label="Prompt template" code={LLM_PROMPT} />
+
+### 3. Use the API directly
+
+If you're a developer, running scripts, or building tools, you can create decks programmatically via the REST API. Generate an API key in [Settings → API Keys](/settings) and POST directly to `/api/decks`. The rest of this page documents everything the API can do.
+
+---
 
 ## Authentication
 
@@ -133,6 +160,23 @@ Returns `204 No Content` on success.
 <ErrorTable errors={[
   { code: "401", message: "Missing or invalid API key" },
   { code: "403", message: "Deck belongs to a different user" },
+  { code: "404", message: "Deck not found" },
+]} />
+
+---
+
+### Export a deck
+
+<EndpointCard method="GET" path="/api/decks/:id/export" auth="optional" />
+
+Downloads a deck as a `.json` file in the same format accepted by **Import JSON**. Useful for backing up a deck, sharing it, or re-importing it elsewhere. Public decks are accessible without authentication; private decks require the owner's API key.
+
+The response is sent as a file download (`Content-Disposition: attachment`) with a filename derived from the deck title.
+
+<CodeBlock label="Response (200)" code={DECK_EXPORT_RESPONSE} />
+
+<ErrorTable errors={[
+  { code: "401", message: "Deck is private — provide the owner's API key" },
   { code: "404", message: "Deck not found" },
 ]} />
 
@@ -372,14 +416,14 @@ Removes a deck from a collection. The deck itself is **not** deleted. Returns `2
 
 All endpoints follow standard HTTP conventions.
 
-| Code | Meaning |
-|------|---------|
-| `200` | Success |
-| `201` | Created |
-| `204` | Success — no body returned |
-| `400` | Invalid JSON body |
-| `401` | Missing or invalid API key |
-| `403` | Forbidden — resource belongs to a different user |
-| `404` | Resource not found |
-| `422` | Validation error — check the `error` field in the response body for details |
-| `5xx` | Server error — wait a moment and retry |
+<ErrorTable title="Status codes" errors={[
+  { code: "200", message: "Success" },
+  { code: "201", message: "Created" },
+  { code: "204", message: "Success — no body returned" },
+  { code: "400", message: "Invalid JSON body" },
+  { code: "401", message: "Missing or invalid API key" },
+  { code: "403", message: "Forbidden — resource belongs to a different user" },
+  { code: "404", message: "Resource not found" },
+  { code: "422", message: "Validation error — check the error field in the response body for details" },
+  { code: "5xx", message: "Server error — wait a moment and retry" },
+]} />

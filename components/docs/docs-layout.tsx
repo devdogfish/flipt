@@ -17,8 +17,12 @@ export function DocsLayout({
             left edge (max-w-5xl = 1024px → half = 512px, plus px-5 = 20px). */}
         <aside className="hidden lg:block w-52 shrink-0">
           <div
-            className="fixed top-16 w-52"
-            style={{ left: "max(20px, calc(50vw - 512px + 20px))" }}
+            className="fixed top-16 bottom-0 w-52 overflow-y-auto py-4"
+            style={{
+              left: "max(20px, calc(50vw - 512px + 20px))",
+              maskImage: "linear-gradient(to bottom, transparent 0px, black 28px, black calc(100% - 28px), transparent 100%)",
+              WebkitMaskImage: "linear-gradient(to bottom, transparent 0px, black 28px, black calc(100% - 28px), transparent 100%)",
+            }}
           >
             <DocsSidebar sections={sections} />
           </div>

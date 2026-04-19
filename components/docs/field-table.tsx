@@ -17,8 +17,8 @@ export function FieldTable({ fields, title = "Request body fields" }: { fields: 
         {fields.map((f) => (
           <div key={f.field} className="flex items-start gap-4 px-4 py-3">
             <code className="text-xs font-mono text-foreground/80 shrink-0 w-52 truncate pt-px">{f.field}</code>
-            <span className="text-xs text-muted-foreground/60 shrink-0 w-24 pt-px">{f.type}</span>
-            <span className={cn("text-xs shrink-0 pt-px", f.required ? "text-amber-500" : "text-muted-foreground/40")}>
+            <span className="text-xs text-muted-foreground shrink-0 w-24 pt-px">{f.type}</span>
+            <span className={cn("text-xs shrink-0 pt-px", f.required ? "text-amber-500" : "text-muted-foreground/70")}>
               {f.required ? "required" : "optional"}
             </span>
             <span className="text-xs text-muted-foreground pt-px hidden sm:block">{f.note}</span>

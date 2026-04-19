@@ -13,36 +13,31 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
+  const session = await auth.api.getSession({ headers: await headers() }).catch(() => null);
+  if (!session) return { title: "Collection — flashcardbrowser" };
+
   const collection = await prisma.collection.findFirst({
-    where: { id, courseCode: { not: null } },
+    where: { id, userId: session.user.id, courseCode: null },
   });
-  if (!collection) return { title: "Course — flashcardbrowser" };
-  return {
-    title: `${collection.courseCode} — flashcardbrowser`,
-    description: `Community flashcard decks for ${collection.name} at Dalhousie. Browse and study.`,
-  };
+  if (!collection) return { title: "Collection — flashcardbrowser" };
+  return { title: `${collection.name} — flashcardbrowser` };
 }
 
-export default async function CourseDecksPage({
+export default async function CollectionPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const session = await auth.api.getSession({ headers: await headers() });
 
-  const [collection, session] = await Promise.all([
+  const [collection, collectionDecks, favorites] = await Promise.all([
     prisma.collection.findFirst({
-      where: { id, courseCode: { not: null } },
+      where: { id, userId: session!.user.id, courseCode: null },
       include: { _count: { select: { decks: true } } },
     }),
-    auth.api.getSession({ headers: await headers() }).catch(() => null),
-  ]);
-
-  if (!collection) notFound();
-
-  const [collectionDecks, favorites] = await Promise.all([
     prisma.collectionDeck.findMany({
-      where: { collectionId: id, deck: { deckType: { not: "COURSE" } } },
+      where: { collectionId: id },
       include: {
         deck: {
           include: {
@@ -52,13 +47,13 @@ export default async function CourseDecksPage({
         },
       },
     }),
-    session
-      ? prisma.deckFavorite.findMany({
-          where: { userId: session.user.id },
-          select: { deckId: true },
-        })
-      : Promise.resolve([]),
+    prisma.deckFavorite.findMany({
+      where: { userId: session!.user.id },
+      select: { deckId: true },
+    }),
   ]);
+
+  if (!collection) notFound();
 
   const decks: BasketDeckData[] = collectionDecks.map((cd) => ({
     id: cd.deck.id,
@@ -67,27 +62,22 @@ export default async function CourseDecksPage({
     cardCount: cd.deck._count.cards,
     coverImage: cd.deck.coverImage ?? null,
     ownerName: cd.deck.owner?.name ?? null,
-    isOwned: session ? cd.deck.owner?.id === session.user.id : false,
+    isOwned: cd.deck.owner?.id === session!.user.id,
     createdAt: cd.deck.createdAt.toISOString(),
   }));
 
   return (
     <PageLayout
       title={collection.name}
-      backHref="/courses"
-      backLabel="Courses"
-      subtitle={`${collection._count.decks} ${collection._count.decks === 1 ? "deck" : "decks"} · Community-maintained`}
+      backHref="/collections"
+      backLabel="My Collections"
+      subtitle={`${collection._count.decks} ${collection._count.decks === 1 ? "deck" : "decks"} · Your collection`}
       maxWidth="max-w-4xl"
-      action={
-        <span className="inline-flex items-center text-xs font-bold px-2.5 py-1 rounded-full bg-foreground text-background mt-1 shrink-0">
-          {collection.courseCode}
-        </span>
-      }
     >
       <BasketDeckView
         decks={decks}
         favoriteIds={favorites.map((f) => f.deckId)}
-        isAuthenticated={!!session}
+        isAuthenticated={true}
       />
     </PageLayout>
   );

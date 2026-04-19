@@ -54,6 +54,12 @@ enum SuggestionStatus {
   REJECTED
 }
 
+enum CourseRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 // ---------------------------------------------------------------------------
 // Models
 // ---------------------------------------------------------------------------
@@ -85,6 +91,8 @@ model User {
   dalVerification  DalVerification?
   fieldOfStudy       String?
   welcomeEmailSent   Boolean  @default(false)
+  pinnedCourses    PinnedCourse[]
+  courseRequests   CourseRequest[]
 
   @@map("user")
 }
@@ -145,8 +153,9 @@ model Collection {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  user  User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  decks CollectionDeck[]
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  decks     CollectionDeck[]
+  pinnedBy  PinnedCourse[]
 
   @@unique([courseCode])
   @@index([userId])
@@ -349,3 +358,29 @@ model CardFlag {
   @@index([cardId])
 }
 
+model PinnedCourse {
+  userId       String
+  collectionId String
+  pinnedAt     DateTime @default(now())
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+
+  @@id([userId, collectionId])
+  @@index([userId])
+}
+
+model CourseRequest {
+  id         String              @id @default(cuid())
+  userId     String
+  courseCode String
+  courseName String
+  notes      String?
+  status     CourseRequestStatus @default(PENDING)
+  createdAt  DateTime            @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+}

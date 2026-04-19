@@ -26,13 +26,22 @@ export function MarketingNav() {
             Docs
           </Button>
         </Link>
+        <Link href="/courses">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-xs text-muted-foreground"
+          >
+            Courses
+          </Button>
+        </Link>
         <Link href="/decks">
           <Button
             variant="ghost"
             size="sm"
             className="text-xs text-muted-foreground"
           >
-            Browse decks
+            Decks
           </Button>
         </Link>
         <Link href="/auth/sign-in">

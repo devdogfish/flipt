@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { BookOpen, Keyboard, Lightbulb, Monitor, Moon, Sun } from "lucide-react"
+import { BookOpen, GraduationCap, LayoutGrid, Lightbulb, LogOut, Monitor, Moon, Settings, Sun, Layers } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { updateTheme } from "@/app/actions"
 
@@ -97,12 +97,30 @@ export function UserMenu({ userName, userEmail, userImage }: UserMenuProps) {
 
           <DropdownMenuSeparator />
           <DropdownMenuItem asChild className="cursor-pointer">
-            <Link href="/decks">Decks</Link>
+            <Link href="/courses" className="flex items-center gap-2">
+              <GraduationCap className="w-3.5 h-3.5 text-muted-foreground" />
+              Courses
+            </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild className="cursor-pointer">
-            <Link href="/settings">Settings</Link>
+            <Link href="/decks" className="flex items-center gap-2">
+              <Layers className="w-3.5 h-3.5 text-muted-foreground" />
+              Decks
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild className="cursor-pointer">
+            <Link href="/collections" className="flex items-center gap-2">
+              <LayoutGrid className="w-3.5 h-3.5 text-muted-foreground" />
+              Collections
+            </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
+          <DropdownMenuItem asChild className="cursor-pointer">
+            <Link href="/settings" className="flex items-center gap-2">
+              <Settings className="w-3.5 h-3.5 text-muted-foreground" />
+              Settings
+            </Link>
+          </DropdownMenuItem>
           <DropdownMenuItem asChild className="cursor-pointer">
             <Link href="/tips" className="flex items-center gap-2">
               <Lightbulb className="w-3.5 h-3.5 text-muted-foreground" />
@@ -110,22 +128,17 @@ export function UserMenu({ userName, userEmail, userImage }: UserMenuProps) {
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild className="cursor-pointer">
-            <Link href="/shortcuts" className="flex items-center gap-2">
-              <Keyboard className="w-3.5 h-3.5 text-muted-foreground" />
-              Shortcuts
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild className="cursor-pointer">
             <Link href="/docs" className="flex items-center gap-2">
               <BookOpen className="w-3.5 h-3.5 text-muted-foreground" />
-              Docs
+              Documentation
             </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
-            className="text-muted-foreground cursor-pointer"
+            className="text-muted-foreground cursor-pointer flex items-center gap-2"
             onClick={handleSignOut}
           >
+            <LogOut className="w-3.5 h-3.5" />
             Sign out
           </DropdownMenuItem>
         </DropdownMenuContent>

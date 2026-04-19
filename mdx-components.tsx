@@ -97,7 +97,7 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
 
     // Blockquote — used for "Note:" callouts in MDX
     blockquote: ({ children }) => (
-      <div className="border-l-2 border-[#FFD400]/60 pl-4 mb-6 [&>p]:text-muted-foreground [&>p]:text-xs [&>p]:mb-0">
+      <div className="border-l-2 border-[#FED43F]/60 pl-4 mb-6 [&>p]:text-muted-foreground [&>p]:text-xs [&>p]:mb-0">
         {children}
       </div>
     ),

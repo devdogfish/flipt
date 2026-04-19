@@ -163,7 +163,7 @@ function FlowConnector() {
         whileInView={{ opacity: 1, scale: 1 }}
         viewport={{ once: true }}
         transition={{ type: "spring", damping: 18, stiffness: 260, delay: 0.3 }}
-        className="flex items-center gap-2 px-4 py-1.5 rounded-full border border-gold/40 bg-gold/5 text-[11px] font-medium text-gold"
+        className="flex items-center gap-2 px-4 py-1.5 rounded-full border border-border bg-muted/60 text-[11px] font-medium text-foreground dark:border-gold/40 dark:bg-gold/5 dark:text-gold"
       >
         <GitFork className="w-3 h-3" />
         Copy this deck
@@ -438,7 +438,7 @@ function UspBlock({
           variants={textItem}
           className="flex items-center gap-3 mb-5"
         >
-          <span className="text-[11px] font-mono text-muted-foreground/60 select-none">
+          <span className="text-[11px] font-mono text-muted-foreground select-none">
             {number}
           </span>
           <div className="h-px flex-1 bg-border" />

@@ -268,3 +268,23 @@ export const COLLECTION_PATCH_RESPONSE = `{
 }`;
 
 export const COLLECTION_ADD_DECK_RESPONSE = `{ "collectionId": "cm1coll1", "deckId": "cm1abc123" }`;
+
+// ── Deck export ──────────────────────────────────────────────────────────────
+
+export const DECK_EXPORT_RESPONSE = `{
+  "name": "Solar System",
+  "description": "Key facts about the planets.",
+  "coverImage": "https://...",
+  "cards": [
+    {
+      "id": "cm1card1",
+      "front": { "title": "How many planets are in the solar system?" },
+      "back": { "title": "8" }
+    },
+    {
+      "id": "cm1card2",
+      "front": { "title": "What is the largest planet?" },
+      "back": { "title": "Jupiter" }
+    }
+  ]
+}`;

@@ -3,13 +3,10 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import Image from "next/image";
 import {
   Globe,
-  GraduationCap,
   Lock,
-  Plus,
   Share2,
   Star,
   ChevronRight,
@@ -29,8 +26,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DeckCard, cardGradient } from "@/components/deck-card";
-import { CollectionStrip, type CollectionData } from "@/components/collection-strip";
-import { toggleFavorite, regenerateAllCovers, createCourseCollection } from "@/app/actions";
+import { toggleFavorite, regenerateAllCovers } from "@/app/actions";
 import { NewDeckButton } from "./new-deck-button";
 
 type SortKey = "newest" | "most-cards" | "alphabetical";
@@ -49,20 +45,11 @@ interface DeckData {
   collectionIds?: string[];
 }
 
-export interface CourseCollectionData {
-  id: string;
-  name: string;
-  courseCode: string;
-  deckCount: number;
-}
-
 interface DeckSelectionProps {
   userDecks: DeckData[];
   sharedDecks?: DeckData[];
   publicDecks: DeckData[];
   favoriteIds: string[];
-  collections?: CollectionData[];
-  courseCollections?: CourseCollectionData[];
 }
 
 export function DeckSelection({
@@ -70,8 +57,6 @@ export function DeckSelection({
   sharedDecks = [],
   publicDecks,
   favoriteIds,
-  collections: initialCollections = [],
-  courseCollections = [],
 }: DeckSelectionProps) {
   const router = useRouter();
   const searchRef = useRef<HTMLInputElement>(null);
@@ -81,21 +66,8 @@ export function DeckSelection({
   const [localFavorites, setLocalFavorites] = useState(
     () => new Set(favoriteIds),
   );
-  const [activeCollectionId, setActiveCollectionId] = useState<string | null>(null);
-  const [collections, setCollections] = useState<CollectionData[]>(initialCollections);
   const [visibleCounts, setVisibleCounts] = useState<Record<string, number>>({});
   const [regenStatus, setRegenStatus] = useState<string | null>(null);
-  const [courseCollectionsList, setCourseCollectionsList] = useState<CourseCollectionData[]>(courseCollections);
-  const [isAddingCourse, setIsAddingCourse] = useState(false);
-  const [newCourseCode, setNewCourseCode] = useState("");
-  const [newCourseName, setNewCourseName] = useState("");
-  const [courseError, setCourseError] = useState<string | null>(null);
-  const [courseSubmitting, setCourseSubmitting] = useState(false);
-  const courseCodeRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    setVisibleCounts({});
-  }, [activeCollectionId]);
 
   const handleToggleFavorite = useCallback((deckId: string) => {
     setLocalFavorites((prev) => {
@@ -132,27 +104,6 @@ export function DeckSelection({
   const handleStartStudy = useCallback(() => {
     router.push(`/study?decks=${selectedDecks.join(",")}`);
   }, [router, selectedDecks]);
-
-  async function handleAddCourseSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const code = newCourseCode.trim();
-    const name = newCourseName.trim();
-    if (!code || !name) return;
-    setCourseError(null);
-    setCourseSubmitting(true);
-    try {
-      const created = await createCourseCollection(code, name);
-      setCourseCollectionsList((prev) => [...prev, { id: created.id, courseCode: created.courseCode, name: created.name, deckCount: 1 }]);
-      setIsAddingCourse(false);
-      setNewCourseCode("");
-      setNewCourseName("");
-      router.push(`/decks/course/${created.id}`);
-    } catch (err) {
-      setCourseError(err instanceof Error ? err.message : "Something went wrong");
-    } finally {
-      setCourseSubmitting(false);
-    }
-  }
 
   const allDecks = useMemo(
     () => [...userDecks, ...sharedDecks, ...publicDecks],
@@ -199,27 +150,15 @@ export function DeckSelection({
     [query, sortDecks],
   );
 
-  const filterByCollection = useCallback(
-    (decks: DeckData[]) => {
-      if (!activeCollectionId) return decks;
-      return decks.filter((d) => d.collectionIds?.includes(activeCollectionId));
-    },
-    [activeCollectionId],
-  );
-
   const filter = useCallback(
-    (decks: DeckData[]) => filterByQuery(filterByCollection(decks)),
-    [filterByQuery, filterByCollection],
+    (decks: DeckData[]) => filterByQuery(decks),
+    [filterByQuery],
   );
 
   const favoriteDecks = filter(allDecks.filter((d) => localFavorites.has(d.id)));
   const filteredUserDecks = filter(userDecks.filter((d) => !localFavorites.has(d.id)));
-  const filteredSharedDecks = activeCollectionId
-    ? []
-    : filter(sharedDecks.filter((d) => !localFavorites.has(d.id)));
-  const filteredPublicDecks = activeCollectionId
-    ? []
-    : filter(publicDecks.filter((d) => !localFavorites.has(d.id)));
+  const filteredSharedDecks = filter(sharedDecks.filter((d) => !localFavorites.has(d.id)));
+  const filteredPublicDecks = filter(publicDecks.filter((d) => !localFavorites.has(d.id)));
 
   const hasAnyDecks = allDecks.length > 0;
   const noResults =
@@ -262,87 +201,6 @@ export function DeckSelection({
 
   return (
     <>
-      {/* Dal Courses — course collections as distinct cards */}
-      <div className="mb-10">
-        <p className="text-xs font-medium text-muted-foreground uppercase tracking-widest mb-4 flex items-center gap-1.5">
-          <GraduationCap className="w-3.5 h-3.5" />
-          Dal Courses
-        </p>
-        <div className="flex flex-col gap-2">
-          {courseCollectionsList.map((c) => (
-            <Link key={c.id} href={`/decks/course/${c.id}`}>
-              <div className="flex items-center gap-4 px-4 py-3 rounded-xl border border-border bg-muted/40 hover:border-border/80 hover:bg-muted/60 transition-colors group">
-                <span className="shrink-0 inline-flex items-center text-[11px] leading-none font-bold px-2.5 py-1 rounded-full bg-foreground text-background">
-                  {c.courseCode}
-                </span>
-                <span className="flex-1 min-w-0 text-sm font-medium truncate">{c.name}</span>
-                <span className="shrink-0 text-xs text-muted-foreground">{c.deckCount} decks</span>
-                <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors shrink-0" />
-              </div>
-            </Link>
-          ))}
-
-          {/* Add course form / button */}
-          {isAddingCourse ? (
-            <form onSubmit={handleAddCourseSubmit} className="flex flex-col gap-2 px-4 py-3 rounded-xl border border-dashed border-border bg-muted/20">
-              <div className="flex items-center gap-2">
-                <input
-                  ref={courseCodeRef}
-                  value={newCourseCode}
-                  onChange={(e) => { setNewCourseCode(e.target.value.toUpperCase()); setCourseError(null); }}
-                  placeholder="Course code (e.g. BIOL 2030)"
-                  className="h-8 px-3 rounded-lg text-sm bg-background border border-border outline-none focus:ring-1 focus:ring-primary w-52 font-mono uppercase placeholder:normal-case placeholder:font-sans"
-                  disabled={courseSubmitting}
-                  autoFocus
-                />
-                <input
-                  value={newCourseName}
-                  onChange={(e) => { setNewCourseName(e.target.value); setCourseError(null); }}
-                  placeholder="Course name"
-                  className="h-8 px-3 rounded-lg text-sm bg-background border border-border outline-none focus:ring-1 focus:ring-primary flex-1"
-                  disabled={courseSubmitting}
-                />
-                <button
-                  type="submit"
-                  disabled={courseSubmitting || !newCourseCode.trim() || !newCourseName.trim()}
-                  className="h-8 px-3 rounded-lg text-sm font-medium bg-foreground text-background disabled:opacity-40 transition-opacity"
-                >
-                  {courseSubmitting ? "Adding…" : "Add"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => { setIsAddingCourse(false); setNewCourseCode(""); setNewCourseName(""); setCourseError(null); }}
-                  className="h-8 w-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  <X size={14} />
-                </button>
-              </div>
-              {courseError && <p className="text-xs text-destructive">{courseError}</p>}
-            </form>
-          ) : (
-            <button
-              onClick={() => { setIsAddingCourse(true); setTimeout(() => courseCodeRef.current?.focus(), 0); }}
-              className="flex items-center gap-2 px-4 py-3 rounded-xl border border-dashed border-border text-sm text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"
-            >
-              <Plus size={14} />
-              Add a course
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Personal collections strip */}
-      {(collections.length > 0 || hasAnyDecks) && (
-        <div className="mb-8">
-          <CollectionStrip
-            collections={collections}
-            activeId={activeCollectionId}
-            onSelect={setActiveCollectionId}
-            onCollectionsChange={setCollections}
-          />
-        </div>
-      )}
-
       {/* Search + Sort + New deck */}
       <div className="flex items-center gap-3 mb-10">
         <div className="relative flex-1">
@@ -374,30 +232,30 @@ export function DeckSelection({
           </DropdownMenu>
         )}
         <NewDeckButton />
-          {process.env.NEXT_PUBLIC_VERCEL_ENV !== "production" && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-9 gap-2 shrink-0 border-dashed border-amber-500/50 text-amber-500 hover:bg-amber-500/10"
-              disabled={regenStatus === "running"}
-              onClick={async () => {
-                setRegenStatus("running");
-                try {
-                  const res = await regenerateAllCovers();
-                  setRegenStatus(
-                    `Done: ${res.success}/${res.total}${res.failed.length ? ` (failed: ${res.failed.join(", ")})` : ""}`,
-                  );
-                  window.location.reload();
-                } catch {
-                  setRegenStatus("Error");
-                }
-              }}
-            >
-              <RefreshCw className={cn("w-3.5 h-3.5", regenStatus === "running" && "animate-spin")} />
-              {regenStatus === "running" ? "Regenerating..." : "Regen All Covers"}
-            </Button>
-          )}
-        </div>
+        {process.env.NEXT_PUBLIC_VERCEL_ENV !== "production" && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-9 gap-2 shrink-0 border-dashed border-amber-500/50 text-amber-500 hover:bg-amber-500/10"
+            disabled={regenStatus === "running"}
+            onClick={async () => {
+              setRegenStatus("running");
+              try {
+                const res = await regenerateAllCovers();
+                setRegenStatus(
+                  `Done: ${res.success}/${res.total}${res.failed.length ? ` (failed: ${res.failed.join(", ")})` : ""}`,
+                );
+                window.location.reload();
+              } catch {
+                setRegenStatus("Error");
+              }
+            }}
+          >
+            <RefreshCw className={cn("w-3.5 h-3.5", regenStatus === "running" && "animate-spin")} />
+            {regenStatus === "running" ? "Regenerating..." : "Regen All Covers"}
+          </Button>
+        )}
+      </div>
       {regenStatus && regenStatus !== "running" && (
         <p className="text-xs text-muted-foreground mb-4">{regenStatus}</p>
       )}
@@ -405,9 +263,7 @@ export function DeckSelection({
       {!hasAnyDecks ? (
         <p className="text-sm text-muted-foreground">No decks available.</p>
       ) : noResults ? (
-        <p className="text-sm text-muted-foreground">
-          {activeCollectionId ? "No decks in this collection yet." : `No decks match "${query}".`}
-        </p>
+        <p className="text-sm text-muted-foreground">No decks match &ldquo;{query}&rdquo;.</p>
       ) : (
         <div className="space-y-12">
           {sections.map((section, sectionIndex) => {

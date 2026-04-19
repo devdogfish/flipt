@@ -56,12 +56,14 @@ export default async function LandingPage() {
             >
               Browse decks
             </Link>
-            <Link
-              href="/auth/sign-in"
-              className="hover:text-foreground transition-colors"
-            >
-              Sign in
-            </Link>
+            {!session && (
+              <Link
+                href="/auth/sign-in"
+                className="hover:text-foreground transition-colors"
+              >
+                Sign in
+              </Link>
+            )}
           </div>
         </div>
       </footer>

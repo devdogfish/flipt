@@ -18,7 +18,7 @@ export default function NewDeckPage() {
         <div className="mb-8">
           <h1 className="text-2xl font-semibold tracking-tight mb-1">New deck</h1>
           <p className="text-sm text-muted-foreground">
-            Create manually or generate from a document.
+            Upload course materials and let AI build your deck, or create manually.
           </p>
         </div>
 

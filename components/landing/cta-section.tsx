@@ -23,7 +23,7 @@ export function CtaSection() {
         <Link href="/auth/sign-up">
           <Button
             size="lg"
-            className="px-10 bg-gold text-[oklch(0.12_0_0)] hover:bg-gold/90 font-medium"
+            className="bg-gold text-[oklch(0.12_0_0)] hover:bg-gold/90 font-medium shadow-none"
           >
             Create free account
           </Button>

@@ -23,7 +23,7 @@ type SortKey = "newest" | "most-cards" | "alphabetical";
 
 const PAGE_SIZE = 6;
 
-export interface CourseDeckData {
+export interface BasketDeckData {
   id: string;
   title: string;
   description: string;
@@ -34,13 +34,13 @@ export interface CourseDeckData {
   createdAt: string;
 }
 
-interface CourseDeckViewProps {
-  decks: CourseDeckData[];
+interface BasketDeckViewProps {
+  decks: BasketDeckData[];
   favoriteIds: string[];
   isAuthenticated: boolean;
 }
 
-export function CourseDeckView({ decks, favoriteIds, isAuthenticated }: CourseDeckViewProps) {
+export function BasketDeckView({ decks, favoriteIds, isAuthenticated }: BasketDeckViewProps) {
   const router = useRouter();
   const searchRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState("");
@@ -85,7 +85,7 @@ export function CourseDeckView({ decks, favoriteIds, isAuthenticated }: CourseDe
   }, [router, selectedDecks]);
 
   const sortDecks = useCallback(
-    (items: CourseDeckData[]): CourseDeckData[] => {
+    (items: BasketDeckData[]): BasketDeckData[] => {
       const sorted = [...items];
       if (sort === "alphabetical") sorted.sort((a, b) => a.title.localeCompare(b.title));
       else if (sort === "most-cards") sorted.sort((a, b) => b.cardCount - a.cardCount);
@@ -160,7 +160,7 @@ export function CourseDeckView({ decks, favoriteIds, isAuthenticated }: CourseDe
       </div>
 
       {decks.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No decks in this course yet.</p>
+        <p className="text-sm text-muted-foreground">No decks here yet.</p>
       ) : filtered.length === 0 ? (
         <p className="text-sm text-muted-foreground">No decks match &ldquo;{query}&rdquo;.</p>
       ) : (

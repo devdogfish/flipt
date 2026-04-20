@@ -27,8 +27,13 @@ export default function SignInPage() {
     e.preventDefault();
     setError(null);
     setPending(true);
-
-    const resolved = await resolveSignInEmail(email);
+    try {
+    let resolved = email.trim().toLowerCase();
+    try {
+      resolved = await resolveSignInEmail(email);
+    } catch {
+      // fall through with original email
+    }
     setResolvedEmail(resolved);
 
     if (mode === "magic-link") {
@@ -54,7 +59,12 @@ export default function SignInPage() {
       }
     }
 
-    setPending(false);
+    } catch (err) {
+      setError("Something went wrong. Please try again.");
+      console.error("[sign-in] unhandled error:", err);
+    } finally {
+      setPending(false);
+    }
   }
 
   if (magicLinkSent) {

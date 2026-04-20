@@ -112,10 +112,15 @@ export const auth = betterAuth({
 
             // Auto-verify Dal email when user signed up with @dal.ca
             if (record.email.endsWith("@dal.ca") && !record.dalEmail) {
-              await prisma.user.update({
-                where: { id: user.id },
-                data: { dalEmail: record.email },
-              });
+              try {
+                await prisma.user.update({
+                  where: { id: user.id },
+                  data: { dalEmail: record.email },
+                });
+              } catch (e: any) {
+                if (e?.code !== "P2002") throw e;
+                // concurrent hook call already set dalEmail — safe to ignore
+              }
             }
 
             if (record.welcomeEmailSent) return;

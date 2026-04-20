@@ -685,6 +685,18 @@ export async function removeDeckFromCollection(
   revalidatePath(`/decks/${deckId}/edit`);
 }
 
+// ── Email resolution (dal alias → primary) ───────────────────────────────────
+
+export async function resolveSignInEmail(email: string): Promise<string> {
+  const normalised = email.trim().toLowerCase();
+  if (!normalised.endsWith("@dal.ca")) return normalised;
+  const user = await prisma.user.findUnique({
+    where: { dalEmail: normalised },
+    select: { email: true },
+  });
+  return user?.email ?? normalised;
+}
+
 // ── Dal verification ─────────────────────────────────────────────────────────
 
 export async function sendDalVerification(dalEmail: string): Promise<void> {

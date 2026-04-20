@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
 import { signIn, authClient } from "@/lib/auth-client";
+import { resolveSignInEmail } from "@/app/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,6 +19,7 @@ export default function SignInPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [magicLinkSent, setMagicLinkSent] = useState(false);
+  const [resolvedEmail, setResolvedEmail] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [pending, setPending] = useState(false);
 
@@ -26,9 +28,12 @@ export default function SignInPage() {
     setError(null);
     setPending(true);
 
+    const resolved = await resolveSignInEmail(email);
+    setResolvedEmail(resolved);
+
     if (mode === "magic-link") {
       const { error } = await authClient.signIn.magicLink({
-        email,
+        email: resolved,
         callbackURL: "/",
       });
       if (error) {
@@ -38,7 +43,7 @@ export default function SignInPage() {
       }
     } else {
       const { error } = await signIn.email({
-        email,
+        email: resolved,
         password,
         callbackURL: "/",
       });
@@ -59,7 +64,7 @@ export default function SignInPage() {
           <p className="text-lg font-medium">Check your email</p>
           <p className="text-sm text-muted-foreground">
             We sent a sign-in link to{" "}
-            <span className="text-foreground">{email}</span>.
+            <span className="text-foreground">{resolvedEmail}</span>.
           </p>
           <button
             className="text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground transition-colors"
